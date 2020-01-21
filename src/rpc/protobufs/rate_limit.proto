@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+/* This service is used by clients to navigate rate limits while handling requests locally. */
+service RateLimitService {
+    rpc authorize(RequestMetaMessage) returns (AuthorizationMessage);
+    rpc update(RateLimitStateMessage) returns (Empty);
+}
+
+message Empty {}
+
+/* RequestMetaMessage represents the meta data of a client's request that is used in determining rate limits. */
+message RequestMetaMessage {
+    string method = 1;
+    string url = 2;
+}
+
+/* AuthorizationMessage represents a server's response to a client's request to authorize a request. */
+message AuthorizationMessage {
+    uint32 reset_after = 1; // How long the client should wait in ms before asking to authorize the request again, if at all. 0 if the request is authorized.
+}
+
+/* RateLimitStateMessage represents the information of a rate limit, received in the response from Discord. */
+message RateLimitStateMessage {
+    RequestMetaMessage request_meta = 1;
+    bool global = 2;
+    string bucket = 3;
+    uint32 limit = 4;
+    uint32 remaining = 5;
+    uint32 reset_after = 6;
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+/* This service is used by clients to offset their gateway identifies.
+ * Used to navigate Discord gateway's identify rate limit and throttle identifies on the same host. */
+service LockService {
+    rpc acquire(LockRequestMessage) returns (StatusMessage);
+    rpc release(TokenMessage) returns (StatusMessage);
+}
+
+/* TokenMessage repesents a unique identifier given to the client by the server on a successful lock().
+ * Used as authorization to perform operations on the existing lock.. */
+message TokenMessage {
+    string value = 1;
+}
+
+/* LockRequest represents a request to the server to acquire the lock. */
+message LockRequestMessage {
+    int32 time_out = 1; // How long the lock should stay active before releasing.
+    string token = 2; 
+}
+
+/* StatusMessage represents the server's response to the client's requested action. */
+message StatusMessage {
+    bool success = 1; // Whether or not the actions was successful.
+    string token = 2;
+    string message = 3; // On unsuccessful action, the reason why.
+}
