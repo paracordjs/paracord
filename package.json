@@ -1,24 +1,25 @@
 {
-  "name": "ripcord",
-  "version": "1.0.0",
-  "description": "Ultra light-weight and injectable Discord Gateway and API handlers alongside a pre-built client.",
+  "name": "paracord",
+  "version": "0.0.1",
+  "description": "Scalable Discord gateway and API handlers alongside a pre-built client.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/smoke.spec.js tests/suite.spec.js  '**/tests/*.spec.js' --exit",
+    "test": "mocha tests/smoke.spec.js tests/suite.spec.js '**/tests/*.spec.js' --exit",
     "test-nodemon": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js'\"",
-    "test-paracord": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g ParacordClient\"",
-    "test-gateway": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g Gateway\"",
-    "test-ripcord": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g RipcordClient\"",
-    "test-util": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g Util\"",
-    "test-guild": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g Guild\"",
+    "test-paracord": "nodemon --exec \"mocha tests/smoke.spec.js tests/suite.spec.js 'src/**/tests/*.spec.js' -g Paracord\"",
     "coverage": "nodemon --exec \"nyc --reporter=html --reporter=text npm run test\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paracordjs/paracord.git"
+  },
   "author": "Landeau McDade",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/paracordjs/paracord/issues"
+  },
   "dependencies": {
     "axios": "^0.19.0",
-    "ioredis": "^4.14.0",
-    "pm2": "^3.5.1",
     "ws": "^7.1.2"
   },
   "devDependencies": {
@@ -26,5 +27,20 @@
     "mocha": "^6.2.1",
     "nyc": "^14.1.1",
     "sinon": "^7.5.0"
-  }
+  },
+  "optionalDependencies": {
+    "@grpc/grpc-js": "^0.6.15",
+    "@grpc/proto-loader": "^0.5.3",
+    "grpc": "^1.24.2",
+    "pm2": "^3.5.1"
+  },
+  "keywords": [
+    "discord",
+    "discordapp",
+    "api",
+    "bot",
+    "client",
+    "node",
+    "paracord"
+  ]
 }
