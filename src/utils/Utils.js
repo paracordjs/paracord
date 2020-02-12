@@ -1,5 +1,5 @@
 "use strict";
-const { DISCORDEPOCH, PERMISSIONS: P } = require("./constants");
+const { DISCORDEPOCH, PERMISSIONS: P, DISCORDIMAGEBASEURL } = require("./constants");
 
 /** A class of help functions used throughout the library. */
 module.exports = class Util {
@@ -178,18 +178,18 @@ module.exports = class Util {
     return perms;
   }
 
-  // static constructUserAvatarUrl(user) {
-  //   if (user.avatar === null || user.avatar === undefined) {
-  //     return `${DISCORDIMAGEBASEURL}embed/avatars/${Number(user.discriminator) %
-  //       5}.png`;
-  //   }
+  static constructUserAvatarUrl(user) {
+    if (user.avatar === null || user.avatar === undefined) {
+      return `${DISCORDIMAGEBASEURL}embed/avatars/${Number(user.discriminator) %
+        5}.png`;
+    }
 
-  //   if (user.avatar.startsWith("a_")) {
-  //     return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.gif`;
-  //   }
+    if (user.avatar.startsWith("a_")) {
+      return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.gif`;
+    }
 
-  //   return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.png`;
-  // }
+    return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.png`;
+  }
 
   /**
    * Appends a user's username to their descriminator in a common format.
