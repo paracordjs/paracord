@@ -206,6 +206,14 @@ module.exports = class Paracord extends EventEmitter {
     });
   }
 
+  emit(type, ...args) {
+    if (this.events === undefined) {
+      super.emit(type, ...args);
+    } else if (this.events[type] !== undefined) {
+      super.emit(this.events[type], ...args);
+    }
+  }
+
   /*
    ********************************
    ************ LOGIN *************
@@ -223,10 +231,6 @@ module.exports = class Paracord extends EventEmitter {
     }
 
     this.allowEventsDuringStartup = options.allowEventsDuringStartup || false;
-
-    if (options.events === undefined) {
-      options.events = this.events;
-    }
 
     if (options.forceStartUpTimeout !== undefined) {
       this.forceStartUpTimer = setTimeout(

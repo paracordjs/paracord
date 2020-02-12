@@ -402,10 +402,8 @@ module.exports = class Gateway {
    * @param {void|Object<string, any>} data Data to send with the event.
    */
   emit(type, data) {
-    if (this.events === undefined) {
+    if (this.emitter !== undefined) {
       this.emitter.emit(type, data);
-    } else if (this.events[type] !== undefined) {
-      this.emitter.emit(this.events[type], data);
     }
   }
 

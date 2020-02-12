@@ -136,11 +136,7 @@ module.exports = class Api {
    */
   emit(type, data) {
     if (this.emitter !== undefined) {
-      if (this.events === undefined) {
-        this.emitter.emit(type, data);
-      } else if (this.events[type] !== undefined) {
-        this.emitter.emit(this.events[type], data);
-      }
+      this.emitter.emit(type, data);
     }
   }
 
