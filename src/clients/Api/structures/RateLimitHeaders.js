@@ -62,7 +62,7 @@ module.exports = class RateLimitHeaders {
       "x-ratelimit-reset-after": resetAfter
     } = headers;
 
-    const global = headers.hasOwnProperty("x-ratelimit-global")
+    const global = Object.prototype.hasOwnProperty.call(headers, "x-ratelimit-global");
 
     return new RateLimitHeaders(
       global,

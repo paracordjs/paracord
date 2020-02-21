@@ -491,11 +491,10 @@ module.exports = class Gateway {
     let message;
     let shouldReconnect = true;
     let logLevel;
-    if (code === CLOSED_BY_PEER){
+    if (code === CLOSED_BY_PEER) {
       logLevel = LOGLEVEL.INFO;
       message = "Connection closed by peer. Reconnecting.";
-    } else 
-    if (code === UNKNOWN_ERROR) {
+    } else if (code === UNKNOWN_ERROR) {
       logLevel = LOGLEVEL.WARNING;
       message = "Discord's not sure what went wrong. Reconnecting.";
     } else if (code === UNKNOWN_OPCODE) {
@@ -618,9 +617,9 @@ module.exports = class Gateway {
       this.ws.close(GATEWAYCLOSECODE.CLEAN);
     } else {
       this.log("WARNING", `Unhandled packet. op: ${opCode} | data: ${data}`);
-
-      this.updateSequence(sequence);
     }
+
+    this.updateSequence(sequence);
   }
 
   /**

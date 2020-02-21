@@ -452,7 +452,7 @@ module.exports = class Api {
    */
   handleRateLimitedRequest(request, rateLimitHeaders) {
     let message;
-    if (rateLimitHeaders.global) {
+    if (rateLimitHeaders === undefined || rateLimitHeaders.global) {
       message = `Request global rate limited: ${request.method} ${request.url}`;
     } else {
       message = `Request rate limited: ${request.method} ${request.url}`;
