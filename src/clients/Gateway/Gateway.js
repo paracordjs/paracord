@@ -472,6 +472,7 @@ module.exports = class Gateway {
   handleCloseCode(code) {
     const {
       CLEAN,
+      CLOSED_BY_PEER,
       UNKNOWN_ERROR,
       UNKNOWN_OPCODE,
       DECODE_ERROR,
@@ -490,6 +491,10 @@ module.exports = class Gateway {
     let message;
     let shouldReconnect = true;
     let logLevel;
+    if (code === CLOSED_BY_PEER){
+      logLevel = LOGLEVEL.INFO;
+      message = "Connection closed by peer. Reconnecting.";
+    } else 
     if (code === UNKNOWN_ERROR) {
       logLevel = LOGLEVEL.WARNING;
       message = "Discord's not sure what went wrong. Reconnecting.";

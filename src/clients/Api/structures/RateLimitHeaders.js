@@ -56,12 +56,13 @@ module.exports = class RateLimitHeaders {
     }
 
     const {
-      "x-ratelimit-global": global,
       "x-ratelimit-bucket": bucket,
       "x-ratelimit-limit": limit,
       "x-ratelimit-remaining": remaining,
       "x-ratelimit-reset-after": resetAfter
     } = headers;
+
+    const global = headers.hasOwnProperty("x-ratelimit-global")
 
     return new RateLimitHeaders(
       global,
