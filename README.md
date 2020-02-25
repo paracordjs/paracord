@@ -22,16 +22,19 @@ A highly-scalable NodeJS framework built to interact with [Discord's API](https:
 
 Paracord addresses an important problem that large bot owners will inevitably encounter, how to avoid the exponential costs of vertically scaling infrastructure in the cloud while maintaining high reliability and availability. Paracord solves this by utilizing clients and servers running [grpc](https://grpc.io/) to support limited interprocess communication between shards on remote hosts. Bots of all sizes can use this framework to get started and seamlessly transition to multi-shard and eventually multi-host configurations with the addition of just a few lines of code.
 
+NOT YET READY FOR PRODUCTION. If you choose to use the modules in this library, understand that nothing here is set in stone and breaking changes may occur without warning.
+
 ---
 
 ## Features
 
 - Native horizontal scaling
+- Internal sharding
 - Fast and efficient inter-host communication with [grpc](https://grpc.io/)
-- Leverages [pm2](https://pm2.keymetrics.io/) for individual shard logging and management
-- Optional remote rate limit handling
-- Limited abstractions, working closer to the API
+- Leverages [pm2](https://pm2.keymetrics.io/) for additional shard separation and log management
 - Modularized REST and Gateway clients
+- Optional remote rate limit handling
+- Limited abstractions, work closer to the API
 
 ---
 
@@ -41,7 +44,7 @@ Paracord addresses an important problem that large bot owners will inevitably en
 
 Paracord requires NodeJS 10.17+.
 
-If you plan to shard, a global installation of [pm2](https://pm2.keymetrics.io/) is required. To install pm2 globally, run the following command:
+If you plan to use the Shard Launcher, a global installation of [pm2](https://pm2.keymetrics.io/) is required. This is not true for internal sharding. To install pm2 globally, run the following command:
 
 ```shell
 npm install pm2 -g
