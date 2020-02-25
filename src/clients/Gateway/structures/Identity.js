@@ -24,7 +24,7 @@ module.exports = class Identity {
 
     Object.assign(this, identity);
 
-    this.shard[0] = Number(this.shard[0]);
+    this.shard = [Number(this.shard[0]), Number(this.shard[1])];
 
     /** @type {string} Bot token. */
     this.token = token;

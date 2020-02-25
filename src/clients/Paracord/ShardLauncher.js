@@ -5,7 +5,11 @@
 const pm2 = require('pm2');
 const Api = require('../Api/');
 
-/** @typedef {number[]} InternalShardIds Shard Ids designated to be spawned internally. */
+function validateShard(shard, shardCount) {
+  if (shard > shardCount - 1) {
+    throw Error(`shard id ${shard} exceeds max shard id of ${shardCount - 1}`);
+  }
+}
 
 /** A script that spawns shards into pm2, injecting shard information into the Paracord client. */
 module.exports = class ShardLauncher {
@@ -34,8 +38,8 @@ module.exports = class ShardLauncher {
 
     /** @type {string} Discord token. Used to find recommended shard count. Will be coerced into a bot token. */
     this.token;
-    /** @type {number} Count of shards that have been launched. */
-    this.launchedCount = 0;
+    /** @type {number} Number of shards to be launched. */
+    this.launchCount;
 
     Object.assign(this, options);
 
@@ -55,27 +59,42 @@ module.exports = class ShardLauncher {
    * @private
    */
   static validateParams(main, options) {
-    const { token, shardIds, shardCount } = options;
+    const {
+      token, shardIds, shardCount, shardChunks,
+    } = options;
 
     if (main === undefined) {
       throw Error(
         "Main must be defined. Please provide the path to your app's entry file.",
       );
     }
-    if (token === undefined && shardIds === undefined) {
-      throw Error('Must provide either a token or shardIds in the options.');
+    if (token === undefined && shardCount === undefined) {
+      throw Error('Must provide either a token or shardCount in the options.');
     }
     if (shardCount <= 0) {
-      throw Error('Shard count may not be 0 or smaller.');
+      throw Error('Shard count may not be less than or equal to 0.');
     }
-    // if (shardIds && shardCount && shardCount < shardIds.length) {
-    //   throw Error('Shard count may not be less than the number of shard IDs.');
-    // }
+
     if (shardCount && shardIds === undefined) {
-      throw Error('Shard Ids must be given with shard count.');
+      console.warn('Shard Ids given without shard count. shardCount will be assumed from Discord and may change in the future. It is recommended that shardCount be defined to avoid unexpected changes.');
     }
-    if (shardIds !== undefined) {
-      console.warning('shardIds defined without shardCount. Ignoring shardIds.');
+    if (shardIds !== undefined && shardChunks === undefined) {
+      console.warn('shardIds defined without shardCount. Ignoring shardIds.');
+    }
+    if (shardIds && shardChunks) {
+      console.warn('shardChunks defined. Ignoring shardIds.');
+    }
+
+    if (shardChunks && shardCount) {
+      shardChunks.forEach((c) => {
+        c.forEach((s) => {
+          validateShard(s, shardCount);
+        });
+      });
+    } else if (shardIds && shardCount) {
+      shardIds.forEach((s) => {
+        validateShard(s, shardCount);
+      });
     }
   }
 
@@ -91,6 +110,12 @@ module.exports = class ShardLauncher {
       ({ shardCount, shardIds } = await this.getShardInfo());
     }
 
+    if (shardIds && shardCount) {
+      shardIds.forEach((s) => {
+        validateShard(s, shardCount);
+      });
+    }
+
     try {
       pm2.connect((err) => {
         if (err) {
@@ -99,10 +124,12 @@ module.exports = class ShardLauncher {
         }
 
         if (shardChunks !== undefined) {
+          this.launchCount = shardChunks.length;
           shardChunks.forEach((s) => {
             this.launchShard(s, shardCount, pm2Options);
           });
         } else {
+          this.launchCount = 1;
           this.launchShard(shardIds, shardCount, pm2Options);
         }
       });
@@ -171,14 +198,15 @@ module.exports = class ShardLauncher {
   }
 
   /**
-   * Disconnects from pm2 when all shards have been launched.
+   * Disconnects from pm2 when all chunks have been launched.
    * @private
    */
   detach(err) {
-    if (++this.launchedCount === this.shardIds.length) {
-      console.log('All shards launched. Disconnecting from pm2.');
+    if (--this.launchCount === 0) {
+      console.log('All chunks launched. Disconnecting from pm2.');
       pm2.disconnect();
     }
+
     if (err) throw err;
   }
 };

@@ -13,7 +13,7 @@ const {
   PARARCORDSWEEPINTERVAL,
 } = require('../../utils/constants');
 
-const { PARACORD_SHARDIDS } = process.env;
+const { PARACORD_SHARDIDS, PARACORD_SHARDCOUNT } = process.env;
 
 /* "Start up" refers to logging in to the gateway and waiting for all the guilds to be returned. By default, events will be surpressed during start up. */
 
@@ -234,6 +234,9 @@ module.exports = class Paracord extends EventEmitter {
 
     if (PARACORD_SHARDIDS !== undefined) {
       options.shards = PARACORD_SHARDIDS.split(',');
+      options.shardCount = PARACORD_SHARDCOUNT;
+      const message = `Injecting shard settings from shard launcher. Shard Ids: ${options.shards}. Shard count: ${options.shardCount}`;
+      this.log('INFO', message);
     }
 
     this.startGatewayLoginInterval();
@@ -415,10 +418,6 @@ module.exports = class Paracord extends EventEmitter {
    * @param {GatewayOptions} options
    */
   setUpGateway(token, options) {
-    // if (process.env.PARACORD_SHARDCOUNT !== undefined) {
-    //   options = this.paracordShardOverride(options);
-    // }
-
     const gateway = new Gateway(token, {
       ...options,
       emitter: this,
@@ -427,26 +426,6 @@ module.exports = class Paracord extends EventEmitter {
 
     return gateway;
   }
-
-  // /**
-  //  * Load in environment variables set by the Shard Launcher.
-  //  * @private
-  //  *
-  //  * @returns {GatewayOptions}
-  //  */
-  // paracordShardOverride(oldOptions) {
-  //   const shardId = Number(process.env.PARACORD_SHARDID);
-  //   const shardCount = Number(process.env.PARACORD_SHARDCOUNT);
-
-  //   const message = `Injecting shard settings from shard launcher. Shard ID: ${shardId}. Shard count: ${shardCount}`;
-  //   this.log('INFO', message);
-
-  //   const options = oldOptions;
-  //   options.identity = options.identity ? { ...options.identity } : {};
-  //   options.identity.shard = [shardId, shardCount];
-
-  //   return options;
-  // }
 
   /**
    * Assigns some public functions from handlers to this client for easier access.
