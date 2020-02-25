@@ -1,7 +1,9 @@
 /* eslint-disable callback-return */
-"use strict";
-const { LockRequestMessage, TokenMessage } = require("../../structures");
-const { LOGSOURCE, LOGLEVEL } = require("../../../utils/constants");
+
+'use strict';
+
+const { LockRequestMessage, TokenMessage } = require('../../structures');
+const { LOG_SOURCES, LOG_LEVELS } = require('../../../utils/constants');
 
 /**
  * Create callback functions for the identify lock service.
@@ -9,7 +11,7 @@ const { LOGSOURCE, LOGLEVEL } = require("../../../utils/constants");
  * @param {Server} server
  * @param {Lock} identifyLock
  */
-module.exports = function(server, identifyLock) {
+module.exports = function (server, identifyLock) {
   function acquire(call, callback) {
     try {
       const { timeOut, token } = LockRequestMessage.fromProto(call.request);
@@ -18,10 +20,10 @@ module.exports = function(server, identifyLock) {
 
       callback(null, message);
     } catch (err) {
-      server.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.ERROR,
-        message: err.message
+      server.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.ERROR,
+        message: err.message,
       });
       callback(err);
     }
@@ -34,19 +36,19 @@ module.exports = function(server, identifyLock) {
       const message = identifyLock.release(token);
 
       if (message.success !== undefined) {
-        server.emit("DEBUG", {
-          source: LOGSOURCE.RPC,
-          level: LOGLEVEL.DEBUG,
-          message: `Lock released by client. Token: ${token}`
+        server.emit('DEBUG', {
+          source: LOG_SOURCES.RPC,
+          level: LOG_LEVELS.DEBUG,
+          message: `Lock released by client. Token: ${token}`,
         });
       }
 
       callback(null, message);
     } catch (err) {
-      server.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.ERROR,
-        message: err.message
+      server.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.ERROR,
+        message: err.message,
       });
       callback(err);
     }

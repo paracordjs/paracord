@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+
 // const TokenMessage = require("./TokenMessage");
 
 /** A class for the StatusMessage protobuf. */
@@ -26,7 +27,7 @@ module.exports = class StatusMessage {
     return {
       success: this.success,
       message: this.message,
-      token: this.token
+      token: this.token,
     };
   }
 
@@ -36,7 +37,7 @@ module.exports = class StatusMessage {
    * @param {StatusMessage} status
    */
   static validateOutgoing(status) {
-    if (typeof status.success !== "boolean") {
+    if (typeof status.success !== 'boolean') {
       throw Error("'success' must be type 'boolean'");
     }
     if (status.success === false && !status.message) {
@@ -67,7 +68,7 @@ module.exports = class StatusMessage {
     return new StatusMessage(
       message.success,
       message.message,
-      message.token
+      message.token,
       // message.token ? TokenMessage.fromProto(message.token).value : undefined
     );
   }

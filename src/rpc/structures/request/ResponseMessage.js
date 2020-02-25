@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** A class for the ResponseMessage protobuf */
 module.exports = class ResponseMessage {
@@ -20,7 +20,7 @@ module.exports = class ResponseMessage {
     return {
       status_code: this.status,
       status_text: this.statusText,
-      data: this.data
+      data: this.data,
     };
   }
 
@@ -49,7 +49,7 @@ module.exports = class ResponseMessage {
     return {
       status,
       statusText,
-      data: data.startsWith("{") ? JSON.parse(data) : data
+      data: data.startsWith('{') ? JSON.parse(data) : data,
     };
   }
 };

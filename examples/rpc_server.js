@@ -1,13 +1,14 @@
-"use strict";
-const { Server } = require("../../index");
-const { EventEmitter } = require("events");
+'use strict';
+
+const { EventEmitter } = require('events');
+const { Server } = require('../../index');
 
 const logEmitter = new EventEmitter();
-logEmitter.on("DEBUG", event => console.log(event));
+logEmitter.on('DEBUG', (event) => console.log(event));
 
 const serverOptions = { emitter: logEmitter };
 /*
-    const serverOptions = { 
+    const serverOptions = {
         emitter: logEmitter,
         host: "127.0.0.1",
         port: "50051"
@@ -16,7 +17,7 @@ const serverOptions = { emitter: logEmitter };
 
 /* Provides logging output for a resultant api client. */
 const apiOptions = { emitter: logEmitter };
-const token = "myBotToken";
+const token = 'myBotToken';
 
 const server = new Server(serverOptions);
 

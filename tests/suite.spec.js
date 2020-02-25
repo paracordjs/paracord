@@ -1,12 +1,13 @@
-"use strict";
-const sinon = require("sinon");
+'use strict';
+
+const sinon = require('sinon');
 
 const FAILED_TESTS = {};
 
 // const originalLogFunction = console.log;
 // let output;
 
-beforeEach(function() {
+beforeEach(function () {
   // output = "";
   // console.log = (...msgs) => {
   //   if (Array.isArray(msgs)) {
@@ -32,11 +33,11 @@ beforeEach(function() {
   }
 });
 
-afterEach(function() {
+afterEach(function () {
   // console.log = originalLogFunction; // undo dummy log function
 
   sinon.restore();
-  if (this.currentTest.state === "failed") {
+  if (this.currentTest.state === 'failed') {
     // console.log(output);
     FAILED_TESTS[this.currentTest.file] = true;
   }

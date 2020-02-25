@@ -1,24 +1,26 @@
 /* eslint-disable no-sync */
-"use strict";
-const grpc = require("@grpc/grpc-js");
+
+'use strict';
+
+const grpc = require('@grpc/grpc-js');
 
 const {
   identifyLockCallbacks,
   requestCallbacks,
-  rateLimitCallbacks
-} = require("../services");
+  rateLimitCallbacks,
+} = require('../services');
 
-const { loadProto } = require("../services/common");
-const { Lock } = require("../structures");
+const { loadProto } = require('../services/common');
+const { Lock } = require('../structures');
 
-const Api = require("../../clients/Api");
-const { RateLimitCache } = require("../../clients/Api/structures");
+const Api = require('../../clients/Api');
+const { RateLimitCache } = require('../../clients/Api/structures');
 
-const { LOGSOURCE, LOGLEVEL } = require("../../utils/constants");
+const { LOG_SOURCES, LOG_LEVELS } = require('../../utils/constants');
 
-const requestProto = loadProto("request");
-const lockProto = loadProto("identify_lock");
-const rateLimitProto = loadProto("rate_limit");
+const requestProto = loadProto('request');
+const lockProto = loadProto('identify_lock');
+const rateLimitProto = loadProto('rate_limit');
 
 /**
  * Rpc server.
@@ -53,10 +55,10 @@ module.exports = class Server extends grpc.Server {
    */
   constructorDefaults(options) {
     const defaults = {
-      host: "127.0.0.1",
-      port: "50051",
+      host: '127.0.0.1',
+      port: '50051',
       channel: grpc.ServerCredentials.createInsecure(),
-      ...options
+      ...options,
     };
 
     Object.assign(this, defaults);
@@ -72,11 +74,11 @@ module.exports = class Server extends grpc.Server {
     const callback = () => {
       this.start();
 
-      let message = `Rpc server running at http://${this.host}:${this.port}`;
-      this.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.INFO,
-        message
+      const message = `Rpc server running at http://${this.host}:${this.port}`;
+      this.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.INFO,
+        message,
       });
     };
 
@@ -103,18 +105,16 @@ module.exports = class Server extends grpc.Server {
    */
   addRequestService(token, apiOptions = {}) {
     apiOptions.requestOptions = apiOptions.requestOptions || {};
-    apiOptions.requestOptions.transformResponse = data => {
-      return data;
-    };
+    apiOptions.requestOptions.transformResponse = (data) => data;
 
     this.apiClient = new Api(token, apiOptions);
     this.apiClient.startQueue();
 
     this.addService(requestProto.RequestService, requestCallbacks(this));
-    this.emit("DEBUG", {
-      source: LOGSOURCE.RPC,
-      level: LOGLEVEL.INFO,
-      message: "The request service has been added to the server."
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.RPC,
+      level: LOG_LEVELS.INFO,
+      message: 'The request service has been added to the server.',
     });
   }
 
@@ -124,12 +124,12 @@ module.exports = class Server extends grpc.Server {
 
     this.addService(
       lockProto.LockService,
-      identifyLockCallbacks(this, this.identifyLock)
+      identifyLockCallbacks(this, this.identifyLock),
     );
-    this.emit("DEBUG", {
-      source: LOGSOURCE.RPC,
-      level: LOGLEVEL.INFO,
-      message: "The identify lock service has been to the server."
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.RPC,
+      level: LOG_LEVELS.INFO,
+      message: 'The identify lock service has been to the server.',
     });
   }
 
@@ -138,12 +138,12 @@ module.exports = class Server extends grpc.Server {
 
     this.addService(
       rateLimitProto.RateLimitService,
-      rateLimitCallbacks(this, this.rateLimitCache)
+      rateLimitCallbacks(this, this.rateLimitCache),
     );
-    this.emit("DEBUG", {
-      source: LOGSOURCE.RPC,
-      level: LOGLEVEL.INFO,
-      message: "The rate limit service has been to the server."
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.RPC,
+      level: LOG_LEVELS.INFO,
+      message: 'The rate limit service has been to the server.',
     });
   }
 
@@ -153,10 +153,10 @@ module.exports = class Server extends grpc.Server {
   }
 
   log(level, message) {
-    this.emit("DEBUG", {
-      source: LOGSOURCE.RPC,
-      level: LOGLEVEL[level],
-      message
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.RPC,
+      level: LOG_LEVELS[level],
+      message,
     });
   }
 };

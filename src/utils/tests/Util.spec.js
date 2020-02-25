@@ -1,12 +1,13 @@
-"use strict";
-const assert = require("assert");
-const sinon = require("sinon");
-const Utils = require("../Utils");
+'use strict';
 
-describe("Utils", () => {
-  describe("timestampFromSnowflake", () => {
-    it(".", () => {
-      const snowflake = "399864099946889216";
+const assert = require('assert');
+const sinon = require('sinon');
+const Utils = require('../Utils');
+
+describe('Utils', () => {
+  describe('timestampFromSnowflake', () => {
+    it('.', () => {
+      const snowflake = '399864099946889216';
 
       const got = Utils.timestampFromSnowflake(snowflake);
 
@@ -14,11 +15,11 @@ describe("Utils", () => {
     });
   });
 
-  describe("computeGuildPerms", () => {
-    it(".", () => {
-      const member = { user: { id: "124" }, roles: [] };
-      const guild = { owner_id: "123", roles: new Map() };
-      const stub_guild_roles_get = sinon.stub(guild.roles, "get");
+  describe('computeGuildPerms', () => {
+    it('.', () => {
+      const member = { user: { id: '124' }, roles: [] };
+      const guild = { owner_id: '123', roles: new Map() };
+      const stub_guild_roles_get = sinon.stub(guild.roles, 'get');
       stub_guild_roles_get.returns({ permissions: 0 });
 
       const got = Utils.computeGuildPerms(member, guild);
@@ -26,10 +27,10 @@ describe("Utils", () => {
       sinon.assert.calledOnce(stub_guild_roles_get);
       assert.strictEqual(got, 0);
     });
-    it("..", () => {
-      const member = { user: { id: "124" }, roles: ["1"] };
-      const guild = { id: "125", owner_id: "123", roles: new Map() };
-      const stub_guild_roles_get = sinon.stub(guild.roles, "get");
+    it('..', () => {
+      const member = { user: { id: '124' }, roles: ['1'] };
+      const guild = { id: '125', owner_id: '123', roles: new Map() };
+      const stub_guild_roles_get = sinon.stub(guild.roles, 'get');
       stub_guild_roles_get.onCall(0).returns({ permissions: 0 });
       stub_guild_roles_get.onCall(1).returns(undefined);
 
@@ -37,12 +38,12 @@ describe("Utils", () => {
 
       sinon.assert.calledTwice(stub_guild_roles_get);
       assert.strictEqual(got, 0);
-      assert.strictEqual(stub_guild_roles_get.getCall(0).args[0], "125");
+      assert.strictEqual(stub_guild_roles_get.getCall(0).args[0], '125');
     });
-    it("...", () => {
-      const member = { user: { id: "124" }, roles: ["1"] };
-      const guild = { owner_id: "123", roles: new Map() };
-      const stub_guild_roles_get = sinon.stub(guild.roles, "get");
+    it('...', () => {
+      const member = { user: { id: '124' }, roles: ['1'] };
+      const guild = { owner_id: '123', roles: new Map() };
+      const stub_guild_roles_get = sinon.stub(guild.roles, 'get');
       stub_guild_roles_get.onCall(0).returns({ permissions: 0 });
       stub_guild_roles_get.onCall(1).returns({ permissions: 0x8 });
 
@@ -50,12 +51,12 @@ describe("Utils", () => {
 
       sinon.assert.calledTwice(stub_guild_roles_get);
       assert.strictEqual(got, 0x8);
-      assert.strictEqual(stub_guild_roles_get.getCall(1).args[0], "1");
+      assert.strictEqual(stub_guild_roles_get.getCall(1).args[0], '1');
     });
-    it("....", () => {
-      const member = { user: { id: "124" }, roles: ["1", "2"] };
-      const guild = { owner_id: "123", roles: new Map() };
-      const stub_guild_roles_get = sinon.stub(guild.roles, "get");
+    it('....', () => {
+      const member = { user: { id: '124' }, roles: ['1', '2'] };
+      const guild = { owner_id: '123', roles: new Map() };
+      const stub_guild_roles_get = sinon.stub(guild.roles, 'get');
       stub_guild_roles_get.onCall(0).returns({ permissions: 0 });
       stub_guild_roles_get.onCall(1).returns({ permissions: 0x1 });
       stub_guild_roles_get.onCall(2).returns({ permissions: 0x2 });
@@ -64,42 +65,48 @@ describe("Utils", () => {
 
       sinon.assert.calledThrice(stub_guild_roles_get);
       assert.strictEqual(got, 0x3);
-      assert.strictEqual(stub_guild_roles_get.getCall(2).args[0], "2");
+      assert.strictEqual(stub_guild_roles_get.getCall(2).args[0], '2');
     });
   });
 
-  describe("_everyoneOverwrites", () => {
-    it(".", () => {
+  describe('_everyoneOverwrites', () => {
+    it('.', () => {
       const perms = 0;
       const overwrites = [];
-      const guildID = "123";
+      const guildID = '123';
 
       const got = Utils._everyoneOverwrites(perms, overwrites, guildID);
 
       assert.strictEqual(got, 0);
     });
-    it("..", () => {
+    it('..', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "role", id: "123", allow: 0x2, deny: 0x0 }];
-      const guildID = "123";
+      const overwrites = [{
+        type: 'role', id: '123', allow: 0x2, deny: 0x0,
+      }];
+      const guildID = '123';
 
       const got = Utils._everyoneOverwrites(perms, overwrites, guildID);
 
       assert.strictEqual(got, 0x3);
     });
-    it("...", () => {
+    it('...', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "role", id: "123", allow: 0x2, deny: 0x1 }];
-      const guildID = "123";
+      const overwrites = [{
+        type: 'role', id: '123', allow: 0x2, deny: 0x1,
+      }];
+      const guildID = '123';
 
       const got = Utils._everyoneOverwrites(perms, overwrites, guildID);
 
       assert.strictEqual(got, 0x2);
     });
-    it("....", () => {
+    it('....', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "member", id: "123", allow: 0x2, deny: 0x1 }];
-      const guildID = "123";
+      const overwrites = [{
+        type: 'member', id: '123', allow: 0x2, deny: 0x1,
+      }];
+      const guildID = '123';
 
       const got = Utils._everyoneOverwrites(perms, overwrites, guildID);
 
@@ -107,8 +114,8 @@ describe("Utils", () => {
     });
   });
 
-  describe("_roleOverwrites", () => {
-    it(".", () => {
+  describe('_roleOverwrites', () => {
+    it('.', () => {
       const perms = 0;
       const overwrites = [];
       const roles = [];
@@ -117,54 +124,58 @@ describe("Utils", () => {
 
       assert.strictEqual(got, 0);
     });
-    it("..", () => {
+    it('..', () => {
       const perms = 0b01;
-      const overwrites = [{ type: "role", id: "123", allow: 0b10, deny: 0b01 }];
+      const overwrites = [{
+        type: 'role', id: '123', allow: 0b10, deny: 0b01,
+      }];
       const roles = [];
 
       const got = Utils._roleOverwrites(perms, overwrites, roles);
 
       assert.strictEqual(got, 0b01);
     });
-    it("...", () => {
+    it('...', () => {
       const perms = 0b01;
-      const overwrites = [{ type: "role", id: "123", allow: 0b10 }];
-      const roles = ["123"];
+      const overwrites = [{ type: 'role', id: '123', allow: 0b10 }];
+      const roles = ['123'];
 
       const got = Utils._roleOverwrites(perms, overwrites, roles);
 
       assert.strictEqual(got, 0b11);
     });
-    it("....", () => {
+    it('....', () => {
       const perms = 0b01;
-      const overwrites = [{ type: "role", id: "123", allow: 0b10, deny: 0b01 }];
-      const roles = ["123"];
+      const overwrites = [{
+        type: 'role', id: '123', allow: 0b10, deny: 0b01,
+      }];
+      const roles = ['123'];
 
       const got = Utils._roleOverwrites(perms, overwrites, roles);
 
       assert.strictEqual(got, 0b10);
     });
-    it(".....", () => {
+    it('.....', () => {
       const perms = 0b0001;
       const overwrites = [
-        { type: "role", id: "123", allow: 0b0010 },
-        { type: "role", id: "456", allow: 0b0100 },
-        { type: "role", id: "789", allow: 0b1000 }
+        { type: 'role', id: '123', allow: 0b0010 },
+        { type: 'role', id: '456', allow: 0b0100 },
+        { type: 'role', id: '789', allow: 0b1000 },
       ];
-      const roles = ["123", "789"];
+      const roles = ['123', '789'];
 
       const got = Utils._roleOverwrites(perms, overwrites, roles);
 
       assert.strictEqual(got, 0b1011);
     });
-    it("......", () => {
+    it('......', () => {
       const perms = 0b0001;
       const overwrites = [
-        { type: "role", id: "123", allow: 0b0010 },
-        { type: "role", id: "456", allow: 0b0100 },
-        { type: "member", id: "789", allow: 0b1000 }
+        { type: 'role', id: '123', allow: 0b0010 },
+        { type: 'role', id: '456', allow: 0b0100 },
+        { type: 'member', id: '789', allow: 0b1000 },
       ];
-      const roles = ["123", "789"];
+      const roles = ['123', '789'];
 
       const got = Utils._roleOverwrites(perms, overwrites, roles);
 
@@ -172,47 +183,53 @@ describe("Utils", () => {
     });
   });
 
-  describe("_memberOverwrites", () => {
-    it(".", () => {
+  describe('_memberOverwrites', () => {
+    it('.', () => {
       const perms = 0;
       const overwrites = [];
-      const memberID = "123";
+      const memberID = '123';
 
       const got = Utils._memberOverwrites(perms, overwrites, memberID);
 
       assert.strictEqual(got, 0);
     });
-    it("..", () => {
+    it('..', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "member", id: "123", allow: 0x2, deny: 0x0 }];
-      const memberID = "123";
+      const overwrites = [{
+        type: 'member', id: '123', allow: 0x2, deny: 0x0,
+      }];
+      const memberID = '123';
 
       const got = Utils._memberOverwrites(perms, overwrites, memberID);
 
       assert.strictEqual(got, 0x3);
     });
-    it("...", () => {
+    it('...', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "member", id: "123", allow: 0x2, deny: 0x1 }];
-      const memberID = "123";
+      const overwrites = [{
+        type: 'member', id: '123', allow: 0x2, deny: 0x1,
+      }];
+      const memberID = '123';
 
       const got = Utils._memberOverwrites(perms, overwrites, memberID);
 
       assert.strictEqual(got, 0x2);
     });
-    it("....", () => {
+    it('....', () => {
       const perms = 0x0;
-      const overwrites = [{ type: "member", id: "123", deny: 0x1 }];
-      const memberID = "123";
+      const overwrites = [{ type: 'member', id: '123', deny: 0x1 }];
+      const memberID = '123';
 
       const got = Utils._memberOverwrites(perms, overwrites, memberID);
 
       assert.strictEqual(got, 0x0);
     });
-    it(".....", () => {
+    it('.....', () => {
       const perms = 0x1;
-      const overwrites = [{ type: "role", id: "123", allow: 0x2, deny: 0x1 }];
-      const memberID = "123";
+      const overwrites = [{
+        type: 'role', id: '123', allow: 0x2, deny: 0x1,
+      }];
+      const memberID = '123';
 
       const got = Utils._memberOverwrites(perms, overwrites, memberID);
 
@@ -220,12 +237,12 @@ describe("Utils", () => {
     });
   });
 
-  describe("computeChannelOverwrites", () => {
-    it(".", () => {
-      const stub_everyoneOverwrites = sinon.stub(Utils, "_everyoneOverwrites");
-      const stub_roleOverwrites = sinon.stub(Utils, "_roleOverwrites");
+  describe('computeChannelOverwrites', () => {
+    it('.', () => {
+      const stub_everyoneOverwrites = sinon.stub(Utils, '_everyoneOverwrites');
+      const stub_roleOverwrites = sinon.stub(Utils, '_roleOverwrites');
       const stub_memberOverwrites = sinon
-        .stub(Utils, "_memberOverwrites")
+        .stub(Utils, '_memberOverwrites')
         .returns(1);
 
       const perms = 0;
@@ -242,14 +259,14 @@ describe("Utils", () => {
     });
   });
 
-  describe("computeChannelPerms", () => {
-    it(".", () => {
+  describe('computeChannelPerms', () => {
+    it('.', () => {
       const stub_computeGuildPerms = sinon
-        .stub(Utils, "computeGuildPerms")
+        .stub(Utils, 'computeGuildPerms')
         .returns(0x8);
       const stub_computerChannelOverwrites = sinon.stub(
         Utils,
-        "computeChannelOverwrites"
+        'computeChannelOverwrites',
       );
 
       const got = Utils.computeChannelPerms(null, null, null, true);
@@ -258,10 +275,10 @@ describe("Utils", () => {
       sinon.assert.notCalled(stub_computerChannelOverwrites);
       assert.strictEqual(got, 0x8);
     });
-    it("..", () => {
-      const stub_computeGuildPerms = sinon.stub(Utils, "computeGuildPerms");
+    it('..', () => {
+      const stub_computeGuildPerms = sinon.stub(Utils, 'computeGuildPerms');
       const stub_computerChannelOverwrites = sinon
-        .stub(Utils, "computeChannelOverwrites")
+        .stub(Utils, 'computeChannelOverwrites')
         .returns(1);
 
       const got = Utils.computeChannelPerms();

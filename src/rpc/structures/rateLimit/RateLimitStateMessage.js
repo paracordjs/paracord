@@ -1,5 +1,6 @@
-"use strict";
-const RequestMetaMessage = require("./RequestMetaMessage");
+'use strict';
+
+const RequestMetaMessage = require('./RequestMetaMessage');
 
 /** A class for the RateLimitStateMessage protobuf. */
 module.exports = class RateLimitStateMessage {
@@ -38,7 +39,7 @@ module.exports = class RateLimitStateMessage {
       limit: this.limit,
       remaining: this.remaining,
       reset_after: this.resetAfter,
-      global: this.global
+      global: this.global,
     };
   }
 
@@ -54,11 +55,11 @@ module.exports = class RateLimitStateMessage {
       bucket,
       remaining,
       resetAfter,
-      limit
+      limit,
     } = rateLimitState;
     if (
-      requestMeta === undefined ||
-      !(requestMeta instanceof RequestMetaMessage)
+      requestMeta === undefined
+      || !(requestMeta instanceof RequestMetaMessage)
     ) {
       throw Error("'requestMeta' must be a defined RequestMetaMessage");
     }
@@ -69,12 +70,12 @@ module.exports = class RateLimitStateMessage {
     if (bucket !== undefined) {
       if (remaining === undefined) {
         throw Error(
-          "'remaining' must be a defined number if bucket is defined"
+          "'remaining' must be a defined number if bucket is defined",
         );
       }
       if (resetAfter === undefined) {
         throw Error(
-          "'resetAfter' must be a defined number if bucket is defined"
+          "'resetAfter' must be a defined number if bucket is defined",
         );
       }
       if (limit === undefined) {
@@ -124,7 +125,7 @@ module.exports = class RateLimitStateMessage {
       message.bucket,
       message.limit,
       message.remaining,
-      message.reset_after
+      message.reset_after,
     );
   }
 };

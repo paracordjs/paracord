@@ -1,0 +1,42 @@
+{
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "extends": [
+    "airbnb-base"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "BigInt": true
+  },
+  "parserOptions": {
+    "sourceType": "script",
+    "ecmaFeatures": {
+      "modules": false
+    }
+  },
+  "rules": {
+    "no-underscore-dangle": "off",
+    "no-bitwise": "off",
+    "no-plusplus": "off",
+    "no-restricted-syntax": "off",
+    "no-unused-expressions": "off",
+    "no-param-reassign": "off",
+    "global-require": "off",
+    "no-use-before-define": "off",
+    "strict": [
+      2,
+      "global"
+    ]
+  },
+  "settings": {
+    "import/core-modules": [
+      "@grpc/grpc-js",
+      "@grpc/proto-loader",
+      "grpc",
+      "pm2"
+    ]
+  }
+}

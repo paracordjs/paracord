@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** A class for the ReequestMessage protobuf */
 module.exports = class RequestMessage {
@@ -24,7 +24,7 @@ module.exports = class RequestMessage {
   get proto() {
     const proto = {
       method: this.method,
-      url: this.url
+      url: this.url,
     };
 
     if (this.data !== undefined) {
@@ -46,15 +46,15 @@ module.exports = class RequestMessage {
    * @param {RequestMessage} token
    */
   static validateOutgoing(request) {
-    if (typeof request.method !== "string") {
+    if (typeof request.method !== 'string') {
       throw Error("'method' must be type 'string'");
     }
-    if (typeof request.url !== "string") {
+    if (typeof request.url !== 'string') {
       throw Error("'url' must be type 'string'");
     }
     if (
-      request.time_out !== undefined &&
-      typeof request.time_out !== "number"
+      request.time_out !== undefined
+      && typeof request.time_out !== 'number'
     ) {
       throw Error("'time_out' must be type 'number'");
     }

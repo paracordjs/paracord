@@ -1,7 +1,8 @@
-"use strict";
-const StatusMessage = require("./StatusMessage");
-const Utils = require("../../../utils");
-const { LOGSOURCE, LOGLEVEL } = require("../../../utils/constants");
+'use strict';
+
+const StatusMessage = require('./StatusMessage');
+const Utils = require('../../../utils');
+const { LOG_SOURCES, LOG_LEVELS } = require('../../../utils/constants');
 
 /**
  * A mutex primarily used by gateway clients to coordinate identifies.
@@ -44,7 +45,7 @@ module.exports = class Lock {
       this.lock(timeOut, token);
       success = true;
     } else {
-      message = "Already locked by a different client.";
+      message = 'Already locked by a different client.';
       token = undefined;
     }
 
@@ -63,12 +64,12 @@ module.exports = class Lock {
     if (this.token === undefined) {
       success = true;
     } else if (token === undefined) {
-      message = "No token provided.";
+      message = 'No token provided.';
     } else if (this.token === token) {
       this.unlock();
       success = true;
     } else {
-      message = "Locked by a different client.";
+      message = 'Locked by a different client.';
     }
 
     return new StatusMessage(success, message);
@@ -87,20 +88,20 @@ module.exports = class Lock {
     } else {
       message = `Lock refreshed. Token: ${token}`;
     }
-    this.emitter.emit("DEBUG", {
-      source: LOGSOURCE.RPC,
-      level: LOGLEVEL.DEBUG,
-      message
+    this.emitter.emit('DEBUG', {
+      source: LOG_SOURCES.RPC,
+      level: LOG_LEVELS.DEBUG,
+      message,
     });
 
     clearTimeout(this.lockTimeout);
     this.token = token;
     this.lockTimeout = setTimeout(() => {
       this.release(token);
-      this.emitter.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.DEBUG,
-        message: `Lock expired after ${timeOut}ms. Token: ${token}`
+      this.emitter.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.DEBUG,
+        message: `Lock expired after ${timeOut}ms. Token: ${token}`,
       });
     }, timeOut);
   }

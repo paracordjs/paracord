@@ -1,6 +1,7 @@
-"use strict";
-const RateLimitMap = require("./RateLimitMap");
-const RateLimit = require("./RateLimit");
+'use strict';
+
+const RateLimitMap = require('./RateLimitMap');
+const RateLimit = require('./RateLimit');
 
 // TODO(lando): add a periodic sweep for ratelimits to fix potential memory leak.
 
@@ -42,7 +43,7 @@ module.exports = class RateLimitCache {
    */
   wrapRequest(requestFunc) {
     /** @type {WrappedRequest} */
-    const wrappedRequest = request => {
+    const wrappedRequest = (request) => {
       const rateLimit = this.getRateLimitFromCache(request);
 
       if (rateLimit !== undefined) {
@@ -65,12 +66,11 @@ module.exports = class RateLimitCache {
     const rateLimit = this.getRateLimitFromCache(request);
     if (rateLimit === undefined) {
       return 0;
-    } else if (!rateLimit.isRateLimited) {
+    } if (!rateLimit.isRateLimited) {
       rateLimit.decrementRemaining();
       return 0;
-    } else {
-      return rateLimit.resetAfter;
     }
+    return rateLimit.resetAfter;
   }
 
   /**
@@ -140,7 +140,7 @@ module.exports = class RateLimitCache {
       const template = {
         resetTimestamp: undefined,
         remaining: state.limit,
-        limit: state.limit
+        limit: state.limit,
       };
       this.templates.set(bucket, Object.freeze(new RateLimit(template)));
     }

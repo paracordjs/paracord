@@ -1,15 +1,17 @@
 /* eslint-disable callback-return */
-"use strict";
+
+'use strict';
+
 const {
   RequestMetaMessage,
   AuthorizationMessage,
-  RateLimitStateMessage
-} = require("../../structures");
+  RateLimitStateMessage,
+} = require('../../structures');
 const {
   BaseRequest,
-  RateLimitHeaders
-} = require("../../../clients/Api/structures");
-const { LOGSOURCE, LOGLEVEL } = require("../../../utils/constants");
+  RateLimitHeaders,
+} = require('../../../clients/Api/structures');
+const { LOG_SOURCES, LOG_LEVELS } = require('../../../utils/constants');
 
 /**
  * Create callback functions for the rate limit service.
@@ -17,7 +19,7 @@ const { LOGSOURCE, LOGLEVEL } = require("../../../utils/constants");
  * @param {Server} server
  * @param {RateLimitCache} cache
  */
-module.exports = function(server, cache) {
+module.exports = function (server, cache) {
   function authorize(call, callback) {
     try {
       const { method, url } = RequestMetaMessage.fromProto(call.request);
@@ -26,20 +28,20 @@ module.exports = function(server, cache) {
 
       if (resetAfter === 0) {
         const message = `Request approved. ${method} ${url}`;
-        server.log("DEBUG", message);
+        server.log('DEBUG', message);
       } else {
         const message = `Request denied. ${method} ${url}`;
-        server.log("DEBUG", message);
+        server.log('DEBUG', message);
       }
 
       const message = new AuthorizationMessage(resetAfter).proto;
 
       callback(null, message);
     } catch (err) {
-      server.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.ERROR,
-        message: err
+      server.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.ERROR,
+        message: err,
       });
       callback(err);
     }
@@ -53,7 +55,7 @@ module.exports = function(server, cache) {
         bucket,
         limit,
         remaining,
-        resetAfter
+        resetAfter,
       } = RateLimitStateMessage.fromProto(call.request);
 
       const { method, url } = requestMeta;
@@ -67,20 +69,20 @@ module.exports = function(server, cache) {
           bucket,
           limit,
           remaining,
-          resetAfter
+          resetAfter,
         );
         cache.update(request, rateLimitHeaders);
       }
 
       const message = `Rate limit cache updated: ${method} ${url} | Remaining: ${remaining}`;
-      server.log("DEBUG", message);
+      server.log('DEBUG', message);
 
       callback(null);
     } catch (err) {
-      server.emit("DEBUG", {
-        source: LOGSOURCE.RPC,
-        level: LOGLEVEL.ERROR,
-        message: err.message
+      server.emit('DEBUG', {
+        source: LOG_SOURCES.RPC,
+        level: LOG_LEVELS.ERROR,
+        message: err.message,
       });
       callback(err);
     }

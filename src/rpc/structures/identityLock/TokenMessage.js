@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** A class for the TokenMessage protobuf. */
 module.exports = class TokenMessage {
@@ -27,7 +27,7 @@ module.exports = class TokenMessage {
     if (token.value === undefined) {
       throw Error("'value' must be a defined string");
     }
-    if (typeof token.value !== "string") {
+    if (typeof token.value !== 'string') {
       throw Error("'value' must be type 'string'");
     }
   }
