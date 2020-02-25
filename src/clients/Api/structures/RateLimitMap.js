@@ -1,5 +1,6 @@
-"use strict";
-const RateLimit = require("./RateLimit");
+'use strict';
+
+const RateLimit = require('./RateLimit');
 
 /** @typedef {import("./Request")} Request */
 
@@ -20,7 +21,7 @@ module.exports = class RateLimitMap extends Map {
    * @returns {RateLimit} New / updated rate limit.
    */
   upsert(rateLimitKey, state) {
-    let rateLimit = this.get(rateLimitKey);
+    const rateLimit = this.get(rateLimitKey);
 
     if (rateLimit === undefined) {
       this.set(rateLimitKey, new RateLimit(state));

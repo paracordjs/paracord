@@ -1,20 +1,21 @@
-"use strict";
-const axios = require("axios");
-const Utils = require("../../utils/Utils");
-const { RequestService, RateLimitService } = require("../../rpc/services");
+'use strict';
+
+const axios = require('axios');
+const Utils = require('../../utils/Utils');
+const { RequestService, RateLimitService } = require('../../rpc/services');
 const {
   RateLimitCache,
   Request,
   RequestQueue,
-  RateLimitHeaders
-} = require("./structures");
+  RateLimitHeaders,
+} = require('./structures');
 
 const {
-  LOGLEVEL,
-  LOGSOURCE,
-  DISCORDAPIURL,
-  DISCORDAPIDEFAULTVERSION
-} = require("../../utils/constants");
+  LOG_LEVELS,
+  LOG_SOURCES,
+  DISCORD_API_URL,
+  DISCORD_API_DEFAULT_VERSION,
+} = require('../../utils/constants');
 
 /** @typedef {import("./structures/Request")} Request */
 /** @typedef {import("../../rpc/")} Response */
@@ -64,7 +65,7 @@ module.exports = class Api {
    * @param {ApiOptions} [options={}] Optional parameters for this handler.
    */
   constructorDefaults(token, options) {
-    this.validateParams(token, options);
+    Api.validateParams(token, options);
     Object.assign(this, options);
     this.rateLimitCache = new RateLimitCache();
     this.requestQueue = new RequestQueue(this.rateLimitCache, this);
@@ -79,9 +80,9 @@ module.exports = class Api {
    *
    * @param {string} token Discord bot token.
    */
-  validateParams(token) {
+  static validateParams(token) {
     if (token === undefined) {
-      throw Error("client requires a bot token");
+      throw Error('client requires a bot token');
     }
   }
 
@@ -91,13 +92,13 @@ module.exports = class Api {
    */
   createWrappedRequest(token) {
     const instance = axios.create({
-      baseURL: `${DISCORDAPIURL}/${DISCORDAPIDEFAULTVERSION}`,
+      baseURL: `${DISCORD_API_URL}/${DISCORD_API_DEFAULT_VERSION}`,
       headers: {
         Authorization: token,
-        "Content-Type": "application/json",
-        "X-RateLimit-Precision": "millisecond"
+        'Content-Type': 'application/json',
+        'X-RateLimit-Precision': 'millisecond',
       },
-      ...(this.requestOptions || {})
+      ...(this.requestOptions || {}),
     });
 
     /** @type {WrappedRequest} `axios.request()` decorated with ratelimit handling. */
@@ -119,11 +120,11 @@ module.exports = class Api {
    * @param {*} [data] Data pertinent to the event.
    */
   log(level, message, data) {
-    this.emit("DEBUG", {
-      source: LOGSOURCE.API,
-      level: LOGLEVEL[level],
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.API,
+      level: LOG_LEVELS[level],
       message,
-      data
+      data,
     });
   }
 
@@ -153,11 +154,11 @@ module.exports = class Api {
    */
   addRequestService(serverOptions = {}) {
     if (
-      this.rpcRateLimitService !== undefined ||
-      this.rpcRequestService !== undefined
+      this.rpcRateLimitService !== undefined
+      || this.rpcRequestService !== undefined
     ) {
       throw Error(
-        "A rpc service has already been defined for this client. Only one may be added."
+        'A rpc service has already been defined for this client. Only one may be added.',
       );
     }
 
@@ -165,12 +166,11 @@ module.exports = class Api {
     this.allowFallback = serverOptions.allowFallback;
 
     const message = `Rpc service created for sending requests remotely. Connected to: ${this.rpcRequestService.target}`;
-    this.log("INFO", message);
+    this.log('INFO', message);
 
     if (!this.allowFallback) {
-      const message =
-        "`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.";
-      this.log("WARNING", message);
+      const message = '`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.';
+      this.log('WARNING', message);
     }
   }
 
@@ -181,11 +181,11 @@ module.exports = class Api {
    */
   addRateLimitService(serverOptions = {}) {
     if (
-      this.rpcRateLimitService !== undefined ||
-      this.rpcRequestService !== undefined
+      this.rpcRateLimitService !== undefined
+      || this.rpcRequestService !== undefined
     ) {
       throw Error(
-        "A rpc service has already been defined for this client. Only one may be added."
+        'A rpc service has already been defined for this client. Only one may be added.',
       );
     }
 
@@ -193,12 +193,11 @@ module.exports = class Api {
     this.allowFallback = serverOptions.allowFallback;
 
     const message = `Rpc service created for handling rate limits remotely. Connected to: ${this.rpcRateLimitService.target}`;
-    this.log("INFO", message);
+    this.log('INFO', message);
 
     if (!this.allowFallback) {
-      const message =
-        "`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.";
-      this.log("WARNING", message);
+      const message = '`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.';
+      this.log('WARNING', message);
     }
   }
 
@@ -215,19 +214,19 @@ module.exports = class Api {
    */
   startQueue(interval = 1e3) {
     if (this.requestQueueProcessInterval === undefined) {
-      this.log("INFO", "Starting request queue.");
+      this.log('INFO', 'Starting request queue.');
       this.requestQueueProcessInterval = setInterval(
         this.requestQueue.process.bind(this.requestQueue),
-        interval
+        interval,
       );
     } else {
-      throw Error("request queue already started");
+      throw Error('request queue already started');
     }
   }
 
   /** Stops the request rate limit queue processesing. */
   stopQueue() {
-    this.log("INFO", "Stopping request queue.");
+    this.log('INFO', 'Stopping request queue.');
     clearInterval(this.requestQueueProcessInterval);
     this.requestQueueProcessInterval = undefined;
   }
@@ -239,7 +238,7 @@ module.exports = class Api {
    */
   sendQueuedRequest(request) {
     const message = `Sending queued request: ${request.method} ${request.url}`;
-    this.log("DEBUG", message, request);
+    this.log('DEBUG', message, request);
     return this.wrappedRequest(request);
   }
 
@@ -255,10 +254,10 @@ module.exports = class Api {
    * @param {Request} request Request being made.
    */
   async handleRequestRemote(request) {
-    this.emit("DEBUG", {
-      source: LOGSOURCE.API,
-      level: LOGLEVEL.DEBUG,
-      message: "Sending request over Rpc to server."
+    this.emit('DEBUG', {
+      source: LOG_SOURCES.API,
+      level: LOG_LEVELS.DEBUG,
+      message: 'Sending request over Rpc to server.',
     });
 
     let res = {};
@@ -266,9 +265,8 @@ module.exports = class Api {
       res = await this.rpcRequestService.request(request);
     } catch (err) {
       if (err.code === 14 && this.allowFallback) {
-        const message =
-          "Could not reach RPC server. Falling back to handling request locally.";
-        this.log("ERROR", message);
+        const message = 'Could not reach RPC server. Falling back to handling request locally.';
+        this.log('ERROR', message);
 
         res = await this.handleRequestLocal(request);
       } else {
@@ -293,20 +291,19 @@ module.exports = class Api {
   async request(method, url, options = {}) {
     const { data, headers, local } = options;
 
-    if (url.startsWith("/")) {
+    if (url.startsWith('/')) {
       url = url.slice(1);
     }
 
     const request = new Request(method.toUpperCase(), url, {
       data,
-      headers
+      headers,
     });
 
     if (this.rpcRequestService === undefined || local) {
       return this.handleRequestLocal(request);
-    } else {
-      return this.handleRequestRemote(request);
     }
+    return this.handleRequestRemote(request);
   }
 
   /**
@@ -318,23 +315,21 @@ module.exports = class Api {
    */
   async handleRequestLocal(request) {
     if (this.requestQueueProcessInterval === undefined) {
-      const message =
-        "Making a request with a local Api client without a running request queue. Please invoke `startQueue()` on this client so that rate limits may be handled.";
-      this.log("WARNING", message);
+      const message = 'Making a request with a local Api client without a running request queue. Please invoke `startQueue()` on this client so that rate limits may be handled.';
+      this.log('WARNING', message);
     }
 
     // TODO(lando): Review 429-handling logic. This loop may be stacking calls.
 
     let response = await this.sendRequest(request);
     const rateLimitHeaders = RateLimitHeaders.extractRateLimitFromHeaders(
-      response.headers
+      response.headers,
     );
 
     while (response.status === 429) {
       if (this.requestQueueProcessInterval === undefined) {
-        const message =
-          "A request has been rate limited and will not be processed. Please invoke `startQueue()` on this client so that rate limits may be handled.";
-        this.log("WARNING", message);
+        const message = 'A request has been rate limited and will not be processed. Please invoke `startQueue()` on this client so that rate limits may be handled.';
+        this.log('WARNING', message);
       }
       response = await this.handleRateLimitedRequest(request, rateLimitHeaders);
     }
@@ -355,8 +350,8 @@ module.exports = class Api {
     this.rateLimitCache.update(request, rateLimitHeaders);
 
     if (
-      this.rpcRateLimitService !== undefined &&
-      rateLimitHeaders !== undefined
+      this.rpcRateLimitService !== undefined
+      && rateLimitHeaders !== undefined
     ) {
       this.updateRpcCache(request, rateLimitHeaders);
     }
@@ -366,7 +361,7 @@ module.exports = class Api {
     try {
       await this.rpcRateLimitService.update(
         request,
-        ...rateLimitHeaders.rpcArgs
+        ...rateLimitHeaders.rpcArgs,
       );
     } catch (err) {
       if (err.code !== 14) {
@@ -384,13 +379,12 @@ module.exports = class Api {
   async sendRequest(request) {
     if (await this.returnOkToMakeRequest(request)) {
       const message = `Sending request: ${request.method} ${request.url}`;
-      this.log("DEBUG", message, request);
+      this.log('DEBUG', message, request);
       return this.wrappedRequest(request);
-    } else {
-      const message = `Enqueuing request: ${request.method} ${request.url}`;
-      this.log("DEBUG", message, request);
-      return this.enqueueRequest(request);
     }
+    const message = `Enqueuing request: ${request.method} ${request.url}`;
+    this.log('DEBUG', message, request);
+    return this.enqueueRequest(request);
   }
 
   /**
@@ -401,9 +395,8 @@ module.exports = class Api {
   async returnOkToMakeRequest(request) {
     if (this.rpcRateLimitService !== undefined) {
       return this.authorizeRequestWithServer(request);
-    } else {
-      return !this.rateLimitCache.returnIsRateLimited(request);
     }
+    return !this.rateLimitCache.returnIsRateLimited(request);
   }
 
   /**
@@ -419,26 +412,23 @@ module.exports = class Api {
 
       if (resetAfter === 0) {
         return true;
-      } else {
-        if (
-          request.waitUntil === undefined ||
-          request.waitUntil < new Date().getTime()
-        ) {
-          const waitUntil = Utils.timestampNMillisecondsInFuture(resetAfter);
-          request.assignIfStricterWait(waitUntil);
-        }
-        return false;
       }
+      if (
+        request.waitUntil === undefined
+          || request.waitUntil < new Date().getTime()
+      ) {
+        const waitUntil = Utils.timestampNMillisecondsInFuture(resetAfter);
+        request.assignIfStricterWait(waitUntil);
+      }
+      return false;
     } catch (err) {
       if (err.code === 14 && this.allowFallback) {
-        const message =
-          "Could not reach RPC server. Fallback is allowed. Allowing request to be made.";
-        this.log("ERROR", message);
+        const message = 'Could not reach RPC server. Fallback is allowed. Allowing request to be made.';
+        this.log('ERROR', message);
 
         return true;
-      } else {
-        throw err;
       }
+      throw err;
     }
   }
 
@@ -458,7 +448,7 @@ module.exports = class Api {
       message = `Request rate limited: ${request.method} ${request.url}`;
     }
 
-    this.log("DBEUG", message, rateLimitHeaders);
+    this.log('DBEUG', message, rateLimitHeaders);
 
     this.updateRateLimitCache(request);
     return this.enqueueRequest(request);

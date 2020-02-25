@@ -79,14 +79,13 @@
 
 /** @typedef {[number, number]} Shard [ShardID, ShardCount] to identify with. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure */
 
-/**
+ /**
  * @typedef ParacordLoginOptions Optional parameters for Paracord's login method.
- *
- * @property {[number, number]} [shard] [ShardId, ShardCount] to identify with.
- * @property {number} [forceStartUpTimeout] During start up, the maximum time in ms the client should wait for unavailable guilds after receiving the `READY` event from the gateway before throwing the `PARACORD_STARTUP_COMPLETE` event.
- * @property {number} [forceGuildMaximumUnavailable] During start up, the number of guilds that are allowed to be unavailable.
- * @property {number} [forceGuildStartUpTimeout=60] During start up, time in seconds from the last guild event to wait. Only has an effect when `options.forceGuildMaximumUnavailable` > 0.
- * @property {boolean}[allowEventsDuringStartup=false] During startup, if events should be emitted before `PARACORD_STARTUP_COMPLETE` is emitted. `GUILD_CREATE` events will never be emitted during start up.
+ * 
+ * @param {Object<string, any>} [identity] An object containing information for identifying with the gateway. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
+ * @property {number[]} [shards] Shards to spawn internally.
+ * @property {number} [shardCount] The total number of shards that will be handled by the bot.
+ * @property {boolean} [allowEventsDuringStartup=false] During startup, if events should be emitted before `PARACORD_STARTUP_COMPLETE` is emitted. `GUILD_CREATE` events will never be emitted during start up.
  */
 
 // Paracord
@@ -101,10 +100,10 @@
 
 // Shard Launcher
 
-/**
+//  * @property {[nunmber]} [shardIds] IDs of the shards to launch.
+ /**
  * @typedef ShardLauncherOptions
  * @property {string} [token] Discord token. Used to find recommended shard count when no `shardIds` provided. Will be coerced into a bot token.
- * @property {[nunmber]} [shardIds] IDs of the shards to launch.
  * @property {number} [shardCount] Total number of shards this app will be running across all instances.
  * @property {string} [appName] Name that will appear beside the shard number in pm2.
  * @property {Object<string, any>} [env] Additional environment variables to load into the app.
@@ -123,7 +122,7 @@
  * @typedef ApiResponse Subset of response data after making a request with the Api handler.
  *
  * @property {number} status The HTTP status code of the response.
- * @property {string} statusText Status mssage returned by the server. (e.g. "OK" with a 200 status)
+ * @property {string} statusText Status message returned by the server. (e.g. "OK" with a 200 status)
  * @property {*} data The data returned by Discord.
  */
 
@@ -155,7 +154,7 @@
 /**
  * @typedef StatusMessage
  *
- * @property {boolean} success true, the operation was a success; false, the opeeration failed.
+ * @property {boolean} success true, the operation was a success; false, the operation failed.
  * @property {string} message Reason for the failed operation.
  * @property {stirng} token Unique ID given to the last client to acquire the lock.
  */
@@ -194,7 +193,7 @@
  * @typedef ResponseProto
  *
  * @property {string} status_code The HTTP status code of the response.
- * @property {string} status_text Status mssage returned by the server. (e.g. "OK" with a 200 status)
+ * @property {string} status_text Status message returned by the server. (e.g. "OK" with a 200 status)
  * @property {string} data JSON encoded data returned by Discord.
  */
 

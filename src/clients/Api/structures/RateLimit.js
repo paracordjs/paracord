@@ -1,5 +1,6 @@
-"use strict";
-const Utils = require("../../../utils");
+'use strict';
+
+const Utils = require('../../../utils');
 
 /** State of a Discord rate limit. */
 module.exports = class RateLimit {
@@ -49,11 +50,10 @@ module.exports = class RateLimit {
     if (this.rateLimitHasExpired) {
       this.reset();
       return false;
-    } else if (this.hasRemainingUses) {
+    } if (this.hasRemainingUses) {
       return false;
-    } else {
-      return true;
     }
+    return true;
   }
 
   /** Sets the remaining requests back to the known limit. */
@@ -65,6 +65,7 @@ module.exports = class RateLimit {
   decrementRemaining() {
     --this.remaining;
   }
+
   /**
    * Updates state properties if incoming state is more "strict".
    * Strictness is defined by the value that decreases the chance of getting rate limit.

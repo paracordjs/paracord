@@ -1,14 +1,15 @@
-"use strict";
 /* eslint-disable prefer-destructuring */
+
+'use strict';
 
 const {
   LockRequestMessage,
   StatusMessage,
-  TokenMessage
-} = require("../../structures");
-const { loadProtoDefinition, constructorDefaults } = require("../common");
+  TokenMessage,
+} = require('../../structures');
+const { loadProtoDefinition, constructorDefaults } = require('../common');
 
-const definition = loadProtoDefinition("identify_lock");
+const definition = loadProtoDefinition('identify_lock');
 
 /** Definition for the identity lock rpc service. */
 module.exports = class IdentifyLockService extends definition.LockService {

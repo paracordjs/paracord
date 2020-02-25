@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** A class for the LockRequestMessage protobuf. */
 module.exports = class LockRequestMessage {
@@ -31,10 +31,10 @@ module.exports = class LockRequestMessage {
     if (lockRequest.timeOut === undefined) {
       throw Error("'timeOut' must be a defined number");
     }
-    if (typeof lockRequest.timeOut !== "number") {
+    if (typeof lockRequest.timeOut !== 'number') {
       throw Error("'timeOut' must be type 'number'");
     }
-    if (lockRequest.token !== undefined && typeof lockRequest.token !== "string") {
+    if (lockRequest.token !== undefined && typeof lockRequest.token !== 'string') {
       throw Error("'token' must be type 'string'");
     }
   }

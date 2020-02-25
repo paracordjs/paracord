@@ -1,6 +1,6 @@
 /*
   This structure doesn't have to be as complex as it is and was partly a fun experiment in doing some manual array allocation.
-  While in some cases, having a fixed-size array is beneficial by removing the overhead of constantly allocation/freeing memory 
+  While in some cases, having a fixed-size array is beneficial by removing the overhead of constantly allocation/freeing memory
   for every single item, there's no reason to believe that there would be any tangible benefits in maintaining such an array here.
 */
 
@@ -11,7 +11,9 @@
  */
 
 // TODO(lando): Do some logging on this in prod to make sure it doesn't memory leak.
-"use strict";
+
+'use strict';
+
 /** @typedef {import("./Request")} Request */
 
 /** A queue for rate limited requests waiting to be sent. */
@@ -31,7 +33,7 @@ module.exports = class RequestQueue {
     this.queue = new Array();
     /** @type The internal value of the length of the queue. */
     this._length = 0;
-    /** @type {Api} Api client through which to emit events.*/
+    /** @type {Api} Api client through which to emit events. */
     this.apiClient = apiClient;
   }
 
@@ -45,7 +47,7 @@ module.exports = class RequestQueue {
    * @param {...Request} items Request objects being queued.
    */
   push(...items) {
-    items.forEach(i => {
+    items.forEach((i) => {
       this.queue[++this._length - 1] = i;
     });
   }
@@ -108,8 +110,8 @@ module.exports = class RequestQueue {
     const request = this.queue[queueIdx];
 
     if (
-      request.waitUntil !== undefined &&
-      request.waitUntil > new Date().getTime()
+      request.waitUntil !== undefined
+      && request.waitUntil > new Date().getTime()
     ) {
       return;
     }

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** Basic information in a request to Discord. */
 module.exports = class BaseRequest {
@@ -30,7 +30,7 @@ module.exports = class BaseRequest {
    * @returns {string} A url stripped of leading `/`.
    */
   static stripUrlLeadingSlash(url) {
-    return url.startsWith("/") ? url.replace("/", "") : url;
+    return url.startsWith('/') ? url.replace('/', '') : url;
   }
 
   /**
@@ -46,11 +46,11 @@ module.exports = class BaseRequest {
       rateLimitMajorType,
       rateLimitMajorID,
       ...rateLimitMinorParameters
-    ] = url.split("/");
+    ] = url.split('/');
 
     const rateLimitBucketKey = BaseRequest.convertMetaToBucketKey(
       method,
-      rateLimitMinorParameters
+      rateLimitMinorParameters,
     );
 
     const rateLimitKey = `${rateLimitMajorType}-${rateLimitMajorID}-${rateLimitBucketKey}`;
@@ -69,17 +69,17 @@ module.exports = class BaseRequest {
   static convertMetaToBucketKey(method, rateLimitMinorParameters) {
     const key = [];
 
-    if (method === "GET") key.push("ge");
-    else if (method === "POST") key.push("p");
-    else if (method === "PATCH") key.push("u");
-    else if (method === "DELETE") key.push("d");
+    if (method === 'GET') key.push('ge');
+    else if (method === 'POST') key.push('p');
+    else if (method === 'PATCH') key.push('u');
+    else if (method === 'DELETE') key.push('d');
 
     for (const param of rateLimitMinorParameters) {
-      if (param === "members") key.push("m");
-      else if (param === "guilds") key.push("gu");
-      else if (param === "channels") key.push("c");
+      if (param === 'members') key.push('m');
+      else if (param === 'guilds') key.push('gu');
+      else if (param === 'channels') key.push('c');
     }
 
-    return key.join("-");
+    return key.join('-');
   }
 };

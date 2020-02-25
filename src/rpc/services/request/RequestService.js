@@ -1,10 +1,11 @@
-"use strict";
 /* eslint-disable prefer-destructuring */
 
-const { RequestMessage, ResponseMessage } = require("../../structures");
-const { loadProtoDefinition, constructorDefaults } = require("../common");
+'use strict';
 
-const definition = loadProtoDefinition("request");
+const { RequestMessage, ResponseMessage } = require('../../structures');
+const { loadProtoDefinition, constructorDefaults } = require('../common');
+
+const definition = loadProtoDefinition('request');
 
 /** Definition for the request service. */
 module.exports = class RequestService extends definition.RequestService {

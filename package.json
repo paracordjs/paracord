@@ -23,16 +23,18 @@
     "ws": "^7.1.2"
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
     "mocha": "^6.2.1",
     "nyc": "^14.1.1",
-    "sinon": "^7.5.0"
+    "sinon": "^7.5.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1"
   },
   "optionalDependencies": {
     "@grpc/grpc-js": "^0.6.15",
     "@grpc/proto-loader": "^0.5.3",
     "grpc": "^1.24.2",
-    "pm2": "^3.5.1"
+    "pm2": "^3.5.2"
   },
   "keywords": [
     "discord",

@@ -1,8 +1,18 @@
-"use strict";
-const { DISCORDEPOCH, PERMISSIONS: P, DISCORDIMAGEBASEURL } = require("./constants");
+'use strict';
+
+const { DISCORD_EPOCH, PERMISSIONS: P, DISCORD_CDN_URL } = require('./constants');
 
 /** A class of help functions used throughout the library. */
 module.exports = class Util {
+  /**
+   * Returns a new object that is a clone of the original.
+   *
+   * @param {Object<any, any>} object Object to clone.
+   */
+  static clone(object) {
+    return JSON.parse(JSON.stringify(object));
+  }
+
   /**
    * Returns a timestamp of some time in the future.
    *
@@ -12,7 +22,7 @@ module.exports = class Util {
     return new Date().getTime() + Number(seconds) * 1000;
   }
 
-    /**
+  /**
    * Returns a timestamp of some time in the future.
    *
    * @param {number} milliseconds Number of milliseconds from now to base the timestamp on.
@@ -24,6 +34,12 @@ module.exports = class Util {
   static millisecondsFromNow(timestamp) {
     return Number(timestamp) - new Date().getTime();
   }
+
+  // static guildShardFromID(guildId, shardCount) {
+  //   /* eslint-disable-next-line radix */
+  //   return parseInt(BigInt(guildId) >> BigInt(22)) % shardCount;
+  // }
+
   /**
    * Extract a timestamp from a Discord snowflake.
    *
@@ -33,9 +49,9 @@ module.exports = class Util {
     // eslint-disable-next-line no-undef
     const bits = BigInt(snowflake)
       .toString(2)
-      .padStart(64, "0");
+      .padStart(64, '0');
 
-    return parseInt(bits.substring(0, 42), 2) + DISCORDEPOCH;
+    return parseInt(bits.substring(0, 42), 2) + DISCORD_EPOCH;
   }
 
   /**
@@ -44,7 +60,7 @@ module.exports = class Util {
    * @param {string} token Discord token.
    */
   static coerceTokenToBotLike(token) {
-    if (!token.startsWith("Bot ")) return "Bot " + token;
+    if (!token.startsWith('Bot ')) return `Bot ${token}`;
     return token;
   }
 
@@ -123,13 +139,13 @@ module.exports = class Util {
    * @private
    *
    * @param {number} perms Member's channel-level permissions.
-   * @param {[Object<string, string|number>]} overwrites Channel's overwrites.
+   * @param {Object<string, string|number>[]} overwrites Channel's overwrites.
    * @param {string} guildId ID of the guild in which the permissions are being checked.
    * @returns {number} The new perms.
    */
   static _everyoneOverwrites(perms, overwrites, guildId) {
     for (const o of overwrites) {
-      if (o.type === "role" && o.id === guildId) {
+      if (o.type === 'role' && o.id === guildId) {
         perms |= o.allow;
         perms &= ~o.deny;
         break;
@@ -143,13 +159,13 @@ module.exports = class Util {
    * @private
    *
    * @param {number} perms Member's channel-level permissions.
-   * @param {[Object<string, string|number>]} overwrites Channel's overwrites.
+   * @param {Object<string, string|number>[]} overwrites Channel's overwrites.
    * @param {Map<string, any>} roles Roles in the guild in which the permissions are being checked.
    * @returns {number} The new perms.
    */
   static _roleOverwrites(perms, overwrites, roles) {
     for (const o of overwrites) {
-      if (o.type === "role" && roles.includes(o.id)) {
+      if (o.type === 'role' && roles.includes(o.id)) {
         perms |= o.allow;
         perms &= ~o.deny;
       }
@@ -163,13 +179,13 @@ module.exports = class Util {
    * @private
    *
    * @param {number} perms Member's channel-level permissions.
-   * @param {[Object<string, string|number>]} overwrites Channel's overwrites.
+   * @param {Object<string, string|number>[]} overwrites Channel's overwrites.
    * @param {string} memberId ID of the member whose permissions are being checked.
    * @returns {number} The new perms.
    */
   static _memberOverwrites(perms, overwrites, memberId) {
     for (const o of overwrites) {
-      if (o.type === "member" && o.id === memberId) {
+      if (o.type === 'member' && o.id === memberId) {
         perms |= o.allow;
         perms &= ~o.deny;
         break;
@@ -180,15 +196,15 @@ module.exports = class Util {
 
   static constructUserAvatarUrl(user) {
     if (user.avatar === null || user.avatar === undefined) {
-      return `${DISCORDIMAGEBASEURL}embed/avatars/${Number(user.discriminator) %
-        5}.png`;
+      return `${DISCORD_CDN_URL}embed/avatars/${Number(user.discriminator)
+        % 5}.png`;
     }
 
-    if (user.avatar.startsWith("a_")) {
-      return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.gif`;
+    if (user.avatar.startsWith('a_')) {
+      return `${DISCORD_CDN_URL}avatars/${user.id}/${user.avatar}.gif`;
     }
 
-    return `${DISCORDIMAGEBASEURL}avatars/${user.id}/${user.avatar}.png`;
+    return `${DISCORD_CDN_URL}avatars/${user.id}/${user.avatar}.png`;
   }
 
   /**
@@ -208,7 +224,7 @@ module.exports = class Util {
    */
   static bindFunctionsFromFile(obj, funcs) {
     for (const prop of Object.getOwnPropertyNames(funcs)) {
-      if (typeof funcs[prop] === "function") {
+      if (typeof funcs[prop] === 'function') {
         obj[prop] = funcs[prop].bind(obj);
       }
     }
@@ -221,9 +237,9 @@ module.exports = class Util {
    * @returns {string}
    */
   static uuid() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
-      const r = (Math.random() * 16) | 0,
-        v = c == "x" ? r : (r & 0x3) | 0x8;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c == 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }

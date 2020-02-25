@@ -1,20 +1,21 @@
 /* Making a request with the Paracord client is the same as with the Api client. */
 
-"use strict";
-const { Api } = require("paracord");
+'use strict';
 
-const token = "myBotToken"; // https://discordapp.com/developers/applications/
+const { Api } = require('paracord');
+
+const token = 'myBotToken'; // https://discordapp.com/developers/applications/
 const api = new Api(token);
 
-const method = "GET";
-const endpoint = "/channels/123456789"; // https://discordapp.com/developers/docs/resources/channel
+const method = 'GET';
+const endpoint = '/channels/123456789'; // https://discordapp.com/developers/docs/resources/channel
 
 /* With promise chain. */
-api.request(method, endpoint).then(res => {
+api.request(method, endpoint).then((res) => {
   if (res.status === 200) {
     console.log(res.data);
   } else {
-    throw Error("Bad response.");
+    throw Error('Bad response.');
   }
 });
 
@@ -24,7 +25,7 @@ async function main() {
   if (res.status === 200) {
     console.log(res.data);
   } else {
-    throw Error("Bad response.");
+    throw Error('Bad response.');
   }
 }
 main();

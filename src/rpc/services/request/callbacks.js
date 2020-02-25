@@ -1,13 +1,15 @@
 /* eslint-disable callback-return */
-"use strict";
-const { RequestMessage, ResponseMessage } = require("../../structures");
+
+'use strict';
+
+const { RequestMessage, ResponseMessage } = require('../../structures');
 
 /**
  * Create callback functions for the request service.
  *
  * @param {Server} server
  */
-module.exports = function(server) {
+module.exports = function (server) {
   async function request(call, callback) {
     try {
       const { method, url, options } = RequestMessage.fromProto(call.request);
@@ -16,7 +18,7 @@ module.exports = function(server) {
 
       callback(
         null,
-        new ResponseMessage(res.status, res.statusText, res.data).proto
+        new ResponseMessage(res.status, res.statusText, res.data).proto,
       );
     } catch (err) {
       if (err.response) {

@@ -1,5 +1,6 @@
-"use strict";
-const BaseRequest = require("./BaseRequest");
+'use strict';
+
+const BaseRequest = require('./BaseRequest');
 
 /**
  * A request that will be made to Discord's REST API.
@@ -37,12 +38,12 @@ module.exports = class Request extends BaseRequest {
       url: this.url,
       data: this.data,
       headers: this.headers,
-      validateStatus: null // Tells axios not to throw errors when a non-200 response codes are encountered.
+      validateStatus: null, // Tells axios not to throw errors when a non-200 response codes are encountered.
     };
   }
 
   /**
-   * Assigns a stricter value to `waitUntil`. 
+   * Assigns a stricter value to `waitUntil`.
    * Strictness is defined by the value that decreases the chance of getting rate limited.
    * @param {number} waitUntil A timestamp of when the request will first be availble to try again when queued due to rate limits.
    */

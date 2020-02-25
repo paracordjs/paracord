@@ -1,14 +1,15 @@
-"use strict";
 /* eslint-disable prefer-destructuring */
+
+'use strict';
 
 const {
   RequestMetaMessage,
   AuthorizationMessage,
-  RateLimitStateMessage
-} = require("../../structures");
-const { loadProtoDefinition, constructorDefaults } = require("../common");
+  RateLimitStateMessage,
+} = require('../../structures');
+const { loadProtoDefinition, constructorDefaults } = require('../common');
 
-const definition = loadProtoDefinition("rate_limit");
+const definition = loadProtoDefinition('rate_limit');
 
 /** Definition for the identity lock rpc service. */
 module.exports = class RateLimitService extends definition.RateLimitService {
@@ -59,11 +60,11 @@ module.exports = class RateLimitService extends definition.RateLimitService {
       bucket,
       limit,
       remaining,
-      resetAfter
+      resetAfter,
     ).proto;
 
     return new Promise((resolve, reject) => {
-      super.update(message, err => {
+      super.update(message, (err) => {
         if (err === null) {
           resolve();
         } else {

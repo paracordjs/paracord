@@ -1,6 +1,7 @@
-"use strict";
-const Utils = require("../../../utils");
-const { PERMISSIONS: P } = require("../../../utils/constants");
+'use strict';
+
+const Utils = require('../../../utils');
+const { PERMISSIONS: P } = require('../../../utils/constants');
 
 /** A Discord guild. */
 module.exports = class Guild {
@@ -11,15 +12,15 @@ module.exports = class Guild {
    * @param {Paracord} client Paracord client.
    */
   constructor(guildData, client) {
-    /** @type {Map<string, Object<string, Object<string, any>>>} Cached member objects of this guild.*/
+    /** @type {Map<string, Object<string, Object<string, any>>>} Cached member objects of this guild. */
     this.members;
-    /** @type {Map<string, Object<string, Object<string, any>>} Cached channel objects of this guild.*/
+    /** @type {Map<string, Object<string, Object<string, any>>} Cached channel objects of this guild. */
     this.channels;
-    /** @type {Map<string, Object<string, Object<string, any>>>} Cached presence objects of this guild.*/
+    /** @type {Map<string, Object<string, Object<string, any>>>} Cached presence objects of this guild. */
     this.presences;
-    /** @type {Map<string, Object<string, Object<string, any>>>} Cached role objects of this guild.*/
+    /** @type {Map<string, Object<string, Object<string, any>>>} Cached role objects of this guild. */
     this.roles;
-    /** @type {Map<string, Object<string, Object<string, any>>>} Cached vaoice state objects of this guild.*/
+    /** @type {Map<string, Object<string, Object<string, any>>>} Cached voice state objects of this guild. */
     this.voiceStates;
     /** @type {boolean} If this guild is currently in an unavailable state. */
     this.unavailable;
@@ -29,8 +30,14 @@ module.exports = class Guild {
     this.me;
     /** @type {number} The epoch timestamp of when this guild was created extract from its Id. */
     this.created_on;
+    /** @type {number} Gateway shard that the guild is a part of. */
+    this._shard;
 
     this.constructorDefaults(guildData, client);
+  }
+
+  get shard() {
+    return this._shard;
   }
 
   /*
@@ -53,7 +60,7 @@ module.exports = class Guild {
       presences: new Map(),
       voiceStates: new Map(),
       roles: new Map(),
-      unavailable: false
+      unavailable: false,
     };
 
     Object.assign(this, defaults);
@@ -84,7 +91,7 @@ module.exports = class Guild {
         this.me = this.members.get(client.user.id);
         if (this.me === undefined) {
           console.log(
-            "This message is intentional and is made to appear when a guild is created but the bot user was not included in the initial member list."
+            'This message is intentional and is made to appear when a guild is created but the bot user was not included in the initial member list.',
           );
           // Guild.lazyLoadGuildMe(client);
         }
@@ -123,7 +130,7 @@ module.exports = class Guild {
       this.voiceStates = Guild.mapVoiceStates(
         guildData.voice_states,
         this,
-        client
+        client,
       );
     }
 
@@ -153,9 +160,8 @@ module.exports = class Guild {
 
     if (perms & P.ADMINISTRATOR && adminOverride) {
       return true;
-    } else {
-      return Boolean(perms ^ permission);
     }
+    return Boolean(perms ^ permission);
   }
 
   /**
@@ -168,21 +174,20 @@ module.exports = class Guild {
    * @returns {boolean} `true` if member has the permission.
    */
   hasChannelPermission(permission, member, channel, adminOverride = true) {
-    if (typeof channel === "string") {
+    if (typeof channel === 'string') {
       channel = this.channels.get(channel);
     }
 
     const perms = Utils.computeChannelPerms(
       member,
       this,
-      channel.adminOverride
+      channel.adminOverride,
     );
 
     if (perms & P.ADMINISTRATOR && adminOverride) {
       return true;
-    } else {
-      return (perms ^ permission) !== 0;
     }
+    return (perms ^ permission) !== 0;
   }
 
   /*
@@ -195,11 +200,11 @@ module.exports = class Guild {
    * Create a map of channels keyed to their ids.
    * @private
    *
-   * @param {[Object<string, any>]} channels https://discordapp.com/developers/docs/resources/channel#channel-object-channel-structure
+   * @param {Object<string, any>[]} channels https://discordapp.com/developers/docs/resources/channel#channel-object-channel-structure
    */
   static mapChannels(channels) {
     const channelMap = new Map();
-    channels.forEach(c => Guild.upsertChannel(channelMap, c));
+    channels.forEach((c) => Guild.upsertChannel(channelMap, c));
     return channelMap;
   }
 
@@ -214,7 +219,7 @@ module.exports = class Guild {
     channel.created_on = Utils.timestampFromSnowflake(channel.id);
     channels.set(
       channel.id,
-      Object.assign(channels.get(channel.id) || {}, channel)
+      Object.assign(channels.get(channel.id) || {}, channel),
     );
   }
 
@@ -222,11 +227,11 @@ module.exports = class Guild {
    * Create a map of roles keyed to their ids.
    * @private
    *
-   * @param {[Object<string, any>]} roles https://discordapp.com/developers/docs/topics/permissions#role-object-role-structure
+   * @param {Object<string, any>[]} roles https://discordapp.com/developers/docs/topics/permissions#role-object-role-structure
    */
   static mapRoles(roles) {
     const roleMap = new Map();
-    roles.forEach(r => Guild.upsertRole(roleMap, r));
+    roles.forEach((r) => Guild.upsertRole(roleMap, r));
     return roleMap;
   }
 
@@ -246,12 +251,11 @@ module.exports = class Guild {
    * Create a map of voice states keyed to their user's id.
    * @private
    *
-   * @param {[Object<string, any>]} voiceStates https://discordapp.com/developers/docs/resources/voice
+   * @param {Object<string, any>[]} voiceStates https://discordapp.com/developers/docs/resources/voice
    */
   static mapVoiceStates(voiceStates, guild, client) {
     const voiceStateMap = new Map();
-    voiceStates.forEach(v => Guild.upsertVoiceState(voiceStateMap, v, guild, client)
-    );
+    voiceStates.forEach((v) => Guild.upsertVoiceState(voiceStateMap, v, guild, client));
     return voiceStateMap;
   }
 
@@ -282,12 +286,12 @@ module.exports = class Guild {
    * Create a map of presences keyed to their user's ids.
    * @private
    *
-   * @param {[Object<string, any>]} presences https://discordapp.com/developers/docs/topics/gateway#presence-update-presence-update-event-fields
+   * @param {Object<string, any>[]} presences https://discordapp.com/developers/docs/topics/gateway#presence-update-presence-update-event-fields
    * @param {Paracord} client
    */
   static mapPresences(presences, client) {
     const presenceMap = new Map();
-    presences.forEach(p => {
+    presences.forEach((p) => {
       const cachedPresence = client.updatePresences(p);
       if (cachedPresence !== undefined) {
         presenceMap.set(cachedPresence.user.id, cachedPresence);
@@ -320,10 +324,10 @@ module.exports = class Guild {
    * Cache members and create a map of them keyed to their user ids.
    * @private
    *
-   * @param {[Object<string, any>]} members https://discordapp.com/developers/docs/resources/guild#guild-member-object
+   * @param {Object<string, any>[]} members https://discordapp.com/developers/docs/resources/guild#guild-member-object
    */
   static mapMembers(members, guild, client) {
-    members.forEach(m => guild.upsertMember(m, client));
+    members.forEach((m) => guild.upsertMember(m, client));
   }
 
   /**
@@ -347,6 +351,8 @@ module.exports = class Guild {
 
       return cachedMember;
     }
+
+    return undefined;
   }
 
   // /**

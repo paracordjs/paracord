@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /** A class for the AuthorizationMessage protobuf. */
 module.exports = class AuthorizationMessage {
