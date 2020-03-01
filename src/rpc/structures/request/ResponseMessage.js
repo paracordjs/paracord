@@ -6,7 +6,7 @@ module.exports = class ResponseMessage {
    * Creates a new ResponseMessage send from server to client.
    *
    * @param {number} status The HTTP status code of the response.
-   * @param {string} statuxText Status mssage returned by the server. (e.g. "OK" with a 200 status)
+   * @param {string} statusText Status message returned by the server. (e.g. "OK" with a 200 status)
    * @param {*} data The data returned by Discord.
    */
   constructor(status, statusText, data) {

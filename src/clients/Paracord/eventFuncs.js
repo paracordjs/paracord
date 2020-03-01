@@ -8,7 +8,7 @@ const {
   CHANNEL_TYPES,
 } = require('../../utils/constants');
 
-/** The methods in ALL_CAPS correspond to a Discord gateway event (https://discordapp.com/developers/docs/topics/gateway#commands-and-events-gateway-events) and are called in the Pararcord `.eventHandler()` method. */
+/** The methods in ALL_CAPS correspond to a Discord gateway event (https://discordapp.com/developers/docs/topics/gateway#commands-and-events-gateway-events) and are called in the Paracord `.eventHandler()` method. */
 
 /**
  * @private
@@ -322,8 +322,9 @@ exports.GATEWAY_CLOSE = function GATEWAY_CLOSE({ shouldReconnect, gateway }) {
   if (shouldReconnect) {
     this.gatewayLoginQueue.push(gateway);
 
-    if (gateway.shard === this.startingShard) {
-      this.startingShard = null;
+    if (gateway.shard === this.startingGateway.shard) {
+      this.startingGateway.releaseIdentifyLocks();
+      this.startingGateway = null;
     }
   }
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-/** A class for the ReequestMessage protobuf */
+/** A class for the RequestMessage protobuf */
 module.exports = class RequestMessage {
   /**
    * Create a new RequestMessage sent from client to server.

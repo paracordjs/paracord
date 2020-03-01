@@ -3,7 +3,7 @@
 /**  A container of information for identifying with the gateway. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure */
 module.exports = class Identity {
   /**
-   * Creates a new Identity object for use wuth the gateway.
+   * Creates a new Identity object for use with the gateway.
    *
    * @param {string} token Bot token.
    * @param {void|Object<string, any>} [identity] Properties to add to this identity.

@@ -1,3 +1,4 @@
+'use strict';
 
 module.exports = {
   Gateway: require('./src/clients/Gateway/Gateway'),

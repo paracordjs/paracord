@@ -8,7 +8,7 @@ service RequestService {
 /* Request represents a client's Discord API request.
  * It contains the necessary information for the server to make the request on its behalf. */
 message RequestMessage {
-    string method = 1; // HHTP method
+    string method = 1; // HTTP method
     string url = 2; // Discord endpoint url. (e.g. channels/123)
     string data = 3; // JSON encoded data to send wtih request.
     string headers = 4; // JSON encoded headers to send with request.

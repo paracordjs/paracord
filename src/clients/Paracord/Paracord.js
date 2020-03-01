@@ -10,12 +10,12 @@ const {
   MINUTE_IN_MILLISECONDS,
   LOG_LEVELS,
   LOG_SOURCES,
-  PARARCORDSWEEPINTERVAL,
+  PARACORD_SWEEP_INTERVAL,
 } = require('../../utils/constants');
 
-const { PARACORD_SHARDIDS, PARACORD_SHARDCOUNT } = process.env;
+const { PARACORD_SHARD_IDS, PARACORD_SHARD_COUNT } = process.env;
 
-/* "Start up" refers to logging in to the gateway and waiting for all the guilds to be returned. By default, events will be surpressed during start up. */
+/* "Start up" refers to logging in to the gateway and waiting for all the guilds to be returned. By default, events will be suppressed during start up. */
 
 /**
  * A client that provides caching and limited helper functions. Integrates the Api and Gateway clients into a seamless experience.
@@ -43,14 +43,16 @@ module.exports = class Paracord extends EventEmitter {
     this.gateways;
     /** @type {Gateway[]]} Gateways queue to log in. */
     this.gatewayLoginQueue;
+    /** @type {GatewayLockServerOptions} Identify lock service Options passed to the gateway shards. */
+    this.gatewayLockServiceOptions;
 
     /* State that tracks the start up process. */
     /** @type {number} Timestamp of the last gateway identify. */
     this.safeGatewayIdentifyTimestamp;
     /** @type {number} Gateways left to login on start up before emitting `PARACORD_STARTUP_COMPLETE` event. */
     this.gatewayWaitCount;
-    /** @type {number|void} Shard currently in the initial phases of the gateway connection in progress. */
-    this.startingShard;
+    /** @type {void|Gateway} Shard currently in the initial phases of the gateway connection in progress. */
+    this.startingGateway;
     /** @type {number} Guilds left to ingest on start up before emitting `PARACORD_STARTUP_COMPLETE` event. */
     this.guildWaitCount;
     /** @type {Object<string, any>} User details given by Discord in the "Ready" event form the gateway. https://discordapp.com/developers/docs/topics/gateway#ready-ready-event-fields */
@@ -64,7 +66,9 @@ module.exports = class Paracord extends EventEmitter {
     /** @type {Map} Presence cache. */
     this.presences;
 
-    /** @type {NodeJS.Timer} Interval that removes objects from the presence and user cachces. */
+    /** @type {NodeJS.Timer} Interval that coordinates gateway logins. */
+    this.processGatewayQueueInterval;
+    /** @type {NodeJS.Timer} Interval that removes objects from the presence and user caches. */
     this.sweepCachesInterval;
     /** @type {NodeJS.Timer} Interval that removes object from the redundant presence update cache. */
     this.sweepRecentPresenceUpdatesInterval;
@@ -72,8 +76,6 @@ module.exports = class Paracord extends EventEmitter {
     this.veryRecentlyUpdatedPresences;
     /** @type {Map<string, number>} A short-tern cache for user updates used to avoid processing the same event multiple times. */
     this.veryRecentlyUpdatedUsers;
-
-    this.processGatewayQueueInterval;
 
     /* User-defined event handling behavior. */
     /** @type {Object<string, string>} Key:Value mapping DISCORD_EVENT to user's preferred emitted name for use when connecting to the gateway. */
@@ -110,7 +112,7 @@ module.exports = class Paracord extends EventEmitter {
       gateways: [],
       gatewayLoginQueue: [],
       gatewayWaitCount: 0,
-      startingShard: null,
+      startingGateway: null,
       guildWaitCount: 0,
       allowEventsDuringStartup: false,
     };
@@ -174,7 +176,7 @@ module.exports = class Paracord extends EventEmitter {
       emit = paracordEvent(data, shard);
     }
 
-    if (this.startingShard !== null && this.startingShard === shard) {
+    if (this.startingGateway !== null && this.startingGateway.shard === shard) {
       if (eventType === 'GUILD_CREATE') {
         this.checkIfDoneStarting();
         return undefined;
@@ -232,9 +234,9 @@ module.exports = class Paracord extends EventEmitter {
       this.init();
     }
 
-    if (PARACORD_SHARDIDS !== undefined) {
-      options.shards = PARACORD_SHARDIDS.split(',');
-      options.shardCount = PARACORD_SHARDCOUNT;
+    if (PARACORD_SHARD_IDS !== undefined) {
+      options.shards = PARACORD_SHARD_IDS.split(',');
+      options.shardCount = PARACORD_SHARD_COUNT;
       const message = `Injecting shard settings from shard launcher. Shard Ids: ${options.shards}. Shard count: ${options.shardCount}`;
       this.log('INFO', message);
     }
@@ -267,19 +269,19 @@ module.exports = class Paracord extends EventEmitter {
         const gateway = this.gatewayLoginQueue.shift();
         await gateway.login();
       } else if (
-        this.startingShard === null
+        this.startingGateway === null
         && new Date().getTime() > this.safeGatewayIdentifyTimestamp
       ) {
         const gateway = this.gatewayLoginQueue.shift();
         this.safeGatewayIdentifyTimestamp = 10 * SECOND_IN_MILLISECONDS; // arbitrary buffer
 
         /* eslint-disable-next-line prefer-destructuring */
-        this.startingShard = gateway.shard;
+        this.startingGateway = gateway;
         try {
           await gateway.login();
         } catch (err) {
           this.log('FATAL', err.message, gateway);
-          this.startingShard = null;
+          this.startingGateway = null;
         }
       }
     }
@@ -349,7 +351,7 @@ module.exports = class Paracord extends EventEmitter {
    */
   async computeShards(shards, shardCount) {
     if (shards !== undefined && shardCount === undefined) {
-      throw Error('shards defined with no shardcount.');
+      throw Error('shards defined with no shardCount.');
     }
 
     if (shardCount === undefined) {
@@ -384,7 +386,7 @@ module.exports = class Paracord extends EventEmitter {
 
     this.sweepOldUpdatesInterval = setInterval(
       this.sweepOldUpdates,
-      PARARCORDSWEEPINTERVAL,
+      PARACORD_SWEEP_INTERVAL,
     );
   }
 
@@ -424,6 +426,11 @@ module.exports = class Paracord extends EventEmitter {
       api: this.api,
     });
 
+    if (this.gatewayLockServiceOptions) {
+      const { mainServerOptions, serverOptions } = this.gatewayLockServiceOptions;
+      gateway.addIdentifyLockServices(mainServerOptions, ...serverOptions);
+    }
+
     return gateway;
   }
 
@@ -435,6 +442,19 @@ module.exports = class Paracord extends EventEmitter {
     this.request = this.api.request.bind(this.api);
     this.addRateLimitService = this.api.addRateLimitService.bind(this.api);
     this.addRequestService = this.api.addRequestService.bind(this.api);
+  }
+
+  /**
+   * Stores options that will be passed to each gateway shard when adding the service that will acquire a lock from a server(s) before identifying.
+   *
+   * @param  {void|ServerOptions} mainServerOptions Options for connecting this service to the identifylock server. Will not be released except by time out. Best used for global minimum wait time. Pass `null` to ignore.
+   * @param  {ServerOptions} [serverOptions] Options for connecting this service to the identifylock server. Will be acquired and released in order.
+   */
+  addIdentifyLockServices(mainServerOptions, ...serverOptions) {
+    this.gatewayLockServiceOptions = {
+      mainServerOptions,
+      serverOptions,
+    };
   }
 
   /*
@@ -480,17 +500,18 @@ module.exports = class Paracord extends EventEmitter {
       --this.guildWaitCount;
     }
 
-    let message = `Shard ${this.startingShard} - ${this.guildWaitCount} guilds left in start up.`;
-    if (this.guildWaitCount === 0 && this.startingShard !== null) {
-      message = `Shard ${this.startingShard} - received all start up guilds.`;
-      this.startingShard = null;
+    let message = `Shard ${this.startingGateway.shard} - ${this.guildWaitCount} guilds left in start up.`;
+    if (this.guildWaitCount === 0 && this.startingGateway !== null) {
+      message = `Shard ${this.startingGateway.shard} - received all start up guilds.`;
+      this.startingGateway.releaseIdentifyLocks();
+      this.startingGateway = null;
       --this.gatewayWaitCount;
 
       if (this.gatewayWaitCount === 0) {
         this.completeStartup();
       }
     } else if (this.guildWaitCount < 0) {
-      message = `Shard ${this.startingShard} - guildWaitCount is less than 0. This should not happen. guildWaitCount value: ${this.guildWaitCount}`;
+      message = `Shard ${this.startingGateway.shard} - guildWaitCount is less than 0. This should not happen. guildWaitCount value: ${this.guildWaitCount}`;
       this.log('WARNING', message);
       return;
     }
@@ -506,7 +527,7 @@ module.exports = class Paracord extends EventEmitter {
    */
   completeStartup(reason) {
     this.gatewayLoginQueue.shift();
-    this.startingShard = null;
+    this.startingGateway = null;
 
     // this.clearStartupTimers();
 
@@ -605,7 +626,7 @@ module.exports = class Paracord extends EventEmitter {
       this.presences.set(presence.user.id, presence);
     }
 
-    this.circluarAssignCachedUser(presence);
+    this.circularAssignCachedUser(presence);
 
     return presence;
   }
@@ -630,7 +651,7 @@ module.exports = class Paracord extends EventEmitter {
    *
    * @param {Object<string, any>} presence From Discord - https://discordapp.com/developers/docs/topics/gateway#presence-update
    */
-  circluarAssignCachedUser(presence) {
+  circularAssignCachedUser(presence) {
     const cachedUser = this.users.get(presence.user.id);
     if (cachedUser !== undefined) {
       presence.user = cachedUser;
@@ -642,7 +663,7 @@ module.exports = class Paracord extends EventEmitter {
    * Removes presence from cache.
    * @private
    *
-   * @param {string} userId Id of ther presence's user.
+   * @param {string} userId Id of the presence's user.
    */
   deletePresence(userId) {
     this.presences.delete(userId);

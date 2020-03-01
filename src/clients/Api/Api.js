@@ -33,7 +33,7 @@ module.exports = class Api {
     this.rateLimitCache;
     /** @type {RequestQueue} Rate limited requests queue. For use when not using rpc; or in fallback, */
     this.requestQueue;
-    /** @type {NodeJS.Timer} Interval for processing ratelimited requests on the queue. */
+    /** @type {NodeJS.Timer} Interval for processing rate limited requests on the queue. */
     this.requestQueueProcessInterval;
 
     /** @type {RequestService} When using Rpc, the service through which to pass requests to the server. */
@@ -101,7 +101,7 @@ module.exports = class Api {
       ...(this.requestOptions || {}),
     });
 
-    /** @type {WrappedRequest} `axios.request()` decorated with ratelimit handling. */
+    /** @type {WrappedRequest} `axios.request()` decorated with rate limit handling. */
     this.wrappedRequest = this.rateLimitCache.wrapRequest(instance.request);
   }
 
@@ -165,8 +165,10 @@ module.exports = class Api {
     this.rpcRequestService = new RequestService(serverOptions || {});
     this.allowFallback = serverOptions.allowFallback;
 
-    const message = `Rpc service created for sending requests remotely. Connected to: ${this.rpcRequestService.target}`;
-    this.log('INFO', message);
+    {
+      const message = `Rpc service created for sending requests remotely. Connected to: ${this.rpcRequestService.target}`;
+      this.log('INFO', message);
+    }
 
     if (!this.allowFallback) {
       const message = '`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.';
@@ -192,8 +194,10 @@ module.exports = class Api {
     this.rpcRateLimitService = new RateLimitService(serverOptions || {});
     this.allowFallback = serverOptions.allowFallback;
 
-    const message = `Rpc service created for handling rate limits remotely. Connected to: ${this.rpcRateLimitService.target}`;
-    this.log('INFO', message);
+    {
+      const message = `Rpc service created for handling rate limits remotely. Connected to: ${this.rpcRateLimitService.target}`;
+      this.log('INFO', message);
+    }
 
     if (!this.allowFallback) {
       const message = '`allowFallback` option is not true. Requests will fail when unable to connect to the Rpc server.';
@@ -208,7 +212,7 @@ module.exports = class Api {
    */
 
   /**
-   * Starts the request rate limit queue processesing.
+   * Starts the request rate limit queue processing.
    *
    * @param {number} [interval=1e3] Time between checks in ms.
    */
@@ -224,7 +228,7 @@ module.exports = class Api {
     }
   }
 
-  /** Stops the request rate limit queue processesing. */
+  /** Stops the request rate limit queue processing. */
   stopQueue() {
     this.log('INFO', 'Stopping request queue.');
     clearInterval(this.requestQueueProcessInterval);
@@ -433,7 +437,7 @@ module.exports = class Api {
   }
 
   /**
-   * Updates the rate limit state and enqueues the request.
+   * Updates the rate limit state and queues the request.
    * @private
    *
    * @param {RateLimitHeaders} headers Response headers.
@@ -448,18 +452,18 @@ module.exports = class Api {
       message = `Request rate limited: ${request.method} ${request.url}`;
     }
 
-    this.log('DBEUG', message, rateLimitHeaders);
+    this.log('DEBUG', message, rateLimitHeaders);
 
     this.updateRateLimitCache(request);
     return this.enqueueRequest(request);
   }
 
   /**
-   * Puts the Api Request onto the queue to be executed when the ratelimit has reset.
+   * Puts the Api Request onto the queue to be executed when the rate limit has reset.
    * @private
    *
    * @param {import("./structures/Request")} request The Api Request to queue.
-   * @returns {Promise} Resolves as the reponsse to the request.
+   * @returns {Promise} Resolves as the response to the request.
    */
   enqueueRequest(request) {
     // request.timeout = new Date().getTime() + timeout;

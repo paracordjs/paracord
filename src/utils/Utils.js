@@ -208,7 +208,7 @@ module.exports = class Util {
   }
 
   /**
-   * Appends a user's username to their descriminator in a common format.
+   * Appends a user's username to their discriminator in a common format.
    *
    * @param {Object<string, any>} user
    */
@@ -239,6 +239,7 @@ module.exports = class Util {
   static uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = (Math.random() * 16) | 0;
+      /* eslint-disable-next-line eqeqeq */
       const v = c == 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });

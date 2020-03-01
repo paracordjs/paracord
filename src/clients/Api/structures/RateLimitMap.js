@@ -9,10 +9,6 @@ const RateLimit = require('./RateLimit');
  * @extends Map<string,RateLimit>
  */
 module.exports = class RateLimitMap extends Map {
-  constructor(props) {
-    super(props);
-  }
-
   /**
    * Inserts rate limit if not exists. Otherwise, updates its state.
    *

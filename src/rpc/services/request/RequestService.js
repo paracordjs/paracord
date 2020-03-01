@@ -21,7 +21,7 @@ module.exports = class RequestService extends definition.RequestService {
     this.target = defaultArgs[0];
   }
 
-  /** Sends to the server the information to make a request to Discord. returning a promise with the response.
+  /** Sends the information to make a request to Discord to the server. returning a promise with the response.
    *
    * @param {string} method HTTP method of the request.
    * @param {string} url Discord endpoint url. (e.g. channels/123)
