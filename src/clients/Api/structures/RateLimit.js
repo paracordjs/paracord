@@ -61,7 +61,7 @@ module.exports = class RateLimit {
     this.remaining = this.limit;
   }
 
-  /** Reduces the reamining requests before internally rate limiting by 1. */
+  /** Reduces the remaining requests before internally rate limiting by 1. */
   decrementRemaining() {
     --this.remaining;
   }

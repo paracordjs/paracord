@@ -3,11 +3,11 @@
 const RateLimitMap = require('./RateLimitMap');
 const RateLimit = require('./RateLimit');
 
-// TODO(lando): add a periodic sweep for ratelimits to fix potential memory leak.
+// TODO(lando): add a periodic sweep for rate limits to fix potential memory leak.
 
 /** @typedef {import("./Request")} Request */
 
-/** @typedef {string} RateLimitRequestMeta Combination of request parameters that idenitfy a bucket. */
+/** @typedef {string} RateLimitRequestMeta Combination of request parameters that identify a bucket. */
 /** @typedef {string} RateLimitBucket From Discord - A uid that identifies a group of requests that share a rate limit. */
 /** @typedef {string} RateLimitKey */
 
@@ -27,7 +27,7 @@ const RateLimit = require('./RateLimit');
 module.exports = class RateLimitCache {
   /** Creates a new rate limit cache. */
   constructor() {
-    /** @type {RateLimitMetaToBucket} Request meta values to their associated rate limit bucke; or to `null` if no rate limit for the meta. */
+    /** @type {RateLimitMetaToBucket} Request meta values to their associated rate limit bucket or to `null` if no rate limit for the meta. */
     this.rateLimitMetaToBucket = new Map();
     /** @type {RateLimitMap} Rate limit keys to their associate rate limit. */
     this.rateLimits = new RateLimitMap();
@@ -91,6 +91,8 @@ module.exports = class RateLimitCache {
       }
       return this.createRateLimitFromTemplate(bucket, rateLimitKey);
     }
+
+    return undefined;
   }
 
   /**
@@ -106,6 +108,8 @@ module.exports = class RateLimitCache {
     if (rateLimitTemplate !== undefined) {
       return this.rateLimits.upsert(rateLimitKey, rateLimitTemplate);
     }
+
+    return undefined;
   }
 
   /**
@@ -149,7 +153,7 @@ module.exports = class RateLimitCache {
   /**
    * Runs a request's rate limit meta against the cache to determine if it would trigger a rate limit.
    *
-   * @param {Request} request The request to reference when chacking the rate limit state.
+   * @param {Request} request The request to reference when checking the rate limit state.
    * @returns {boolean} `true` if rate limit would get triggered.
    */
   returnIsRateLimited(request) {

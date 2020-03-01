@@ -164,8 +164,8 @@ module.exports = class ShardLauncher {
     const shardIdsCsv = shardIds.join(',');
     const paracordEnv = {
       PARACORD_TOKEN: this.token,
-      PARACORD_SHARDCOUNT: shardCount,
-      PARACORD_SHARDIDS: shardIdsCsv,
+      PARACORD_SHARD_COUNT: shardCount,
+      PARACORD_SHARD_IDS: shardIdsCsv,
     };
 
     const pm2Config = {

@@ -10,12 +10,12 @@ const {
   MINUTE_IN_MILLISECONDS,
   LOG_LEVELS,
   LOG_SOURCES,
-  PARARCORDSWEEPINTERVAL,
+  PARACORD_SWEEP_INTERVAL,
 } = require('../../utils/constants');
 
-const { PARACORD_SHARDIDS, PARACORD_SHARDCOUNT } = process.env;
+const { PARACORD_SHARD_IDS, PARACORD_SHARD_COUNT } = process.env;
 
-/* "Start up" refers to logging in to the gateway and waiting for all the guilds to be returned. By default, events will be surpressed during start up. */
+/* "Start up" refers to logging in to the gateway and waiting for all the guilds to be returned. By default, events will be suppressed during start up. */
 
 /**
  * A client that provides caching and limited helper functions. Integrates the Api and Gateway clients into a seamless experience.
@@ -234,9 +234,9 @@ module.exports = class Paracord extends EventEmitter {
       this.init();
     }
 
-    if (PARACORD_SHARDIDS !== undefined) {
-      options.shards = PARACORD_SHARDIDS.split(',');
-      options.shardCount = PARACORD_SHARDCOUNT;
+    if (PARACORD_SHARD_IDS !== undefined) {
+      options.shards = PARACORD_SHARD_IDS.split(',');
+      options.shardCount = PARACORD_SHARD_COUNT;
       const message = `Injecting shard settings from shard launcher. Shard Ids: ${options.shards}. Shard count: ${options.shardCount}`;
       this.log('INFO', message);
     }
@@ -351,7 +351,7 @@ module.exports = class Paracord extends EventEmitter {
    */
   async computeShards(shards, shardCount) {
     if (shards !== undefined && shardCount === undefined) {
-      throw Error('shards defined with no shardcount.');
+      throw Error('shards defined with no shardCount.');
     }
 
     if (shardCount === undefined) {
@@ -386,7 +386,7 @@ module.exports = class Paracord extends EventEmitter {
 
     this.sweepOldUpdatesInterval = setInterval(
       this.sweepOldUpdates,
-      PARARCORDSWEEPINTERVAL,
+      PARACORD_SWEEP_INTERVAL,
     );
   }
 
@@ -626,7 +626,7 @@ module.exports = class Paracord extends EventEmitter {
       this.presences.set(presence.user.id, presence);
     }
 
-    this.circluarAssignCachedUser(presence);
+    this.circularAssignCachedUser(presence);
 
     return presence;
   }
@@ -651,7 +651,7 @@ module.exports = class Paracord extends EventEmitter {
    *
    * @param {Object<string, any>} presence From Discord - https://discordapp.com/developers/docs/topics/gateway#presence-update
    */
-  circluarAssignCachedUser(presence) {
+  circularAssignCachedUser(presence) {
     const cachedUser = this.users.get(presence.user.id);
     if (cachedUser !== undefined) {
       presence.user = cachedUser;
@@ -663,7 +663,7 @@ module.exports = class Paracord extends EventEmitter {
    * Removes presence from cache.
    * @private
    *
-   * @param {string} userId Id of ther presence's user.
+   * @param {string} userId Id of the presence's user.
    */
   deletePresence(userId) {
     this.presences.delete(userId);

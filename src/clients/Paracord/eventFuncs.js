@@ -1,6 +1,5 @@
 'use strict';
 
-const Gateway = require('../Gateway');
 const { SECOND_IN_MILLISECONDS } = require('../../utils/constants');
 
 const Guild = require('./structures/Guild');
@@ -9,7 +8,7 @@ const {
   CHANNEL_TYPES,
 } = require('../../utils/constants');
 
-/** The methods in ALL_CAPS correspond to a Discord gateway event (https://discordapp.com/developers/docs/topics/gateway#commands-and-events-gateway-events) and are called in the Pararcord `.eventHandler()` method. */
+/** The methods in ALL_CAPS correspond to a Discord gateway event (https://discordapp.com/developers/docs/topics/gateway#commands-and-events-gateway-events) and are called in the Paracord `.eventHandler()` method. */
 
 /**
  * @private

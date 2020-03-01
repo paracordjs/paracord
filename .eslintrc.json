@@ -37,6 +37,7 @@
   },
   "settings": {
     "import/core-modules": [
+      "axios",
       "@grpc/grpc-js",
       "@grpc/proto-loader",
       "grpc",

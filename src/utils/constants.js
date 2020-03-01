@@ -61,7 +61,7 @@ module.exports = {
   /** Discord epoch (2015-01-01T00:00:00.000Z) */
   DISCORD_EPOCH: 1420070400000,
   DISCORD_CDN_URL: 'https://cdn.discordapp.com/',
-  PARACORD_UPDATE_USER_WAIT_MILLISECONDS: 500,
+  PARACORD_SWEEP_INTERVAL: 500,
   /** A permissions map for operations relevant to the library. */
   PERMISSIONS: {
     ADMINISTRATOR: 0x8,

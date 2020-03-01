@@ -572,7 +572,7 @@ module.exports = class Gateway {
   }
 
   /**
-   * Unsets heartbeat values and clears the heartbeatinterval.
+   * Clears heartbeat values and clears the heartbeatinterval.
    * @private
    */
   clearHeartbeat() {
@@ -649,7 +649,7 @@ module.exports = class Gateway {
   }
 
   /**
-   * Handes "Resumed" packet from Discord. https://discordapp.com/developers/docs/topics/gateway#resumed
+   * Handles "Resumed" packet from Discord. https://discordapp.com/developers/docs/topics/gateway#resumed
    * @private
    */
   handleResumed() {
@@ -920,11 +920,11 @@ module.exports = class Gateway {
   }
 
   /**
-   * Returns whether or not the message to be sent will exceed the ratelimit or not, taking into account padded buffers for high priority packets (e.g. heartbeats, resumes).
+   * Returns whether or not the message to be sent will exceed the rate limit or not, taking into account padded buffers for high priority packets (e.g. heartbeats, resumes).
    * @private
    *
    * @param {number} op Op code of the message to be sent.
-   * @returns {boolean} true if sending message won't exceed ratelimit or padding; false if it will
+   * @returns {boolean} true if sending message won't exceed rate limit or padding; false if it will
    */
   canSendPacket(op) {
     const now = new Date().getTime();

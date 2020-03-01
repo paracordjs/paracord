@@ -36,7 +36,7 @@ module.exports = class Server extends grpc.Server {
     super();
     /** @type {import("events").EventEmitter} Emitter for debug logging. */
     this.emitter;
-    /** @type {RpcServerBindArgs} Argumenets passed when binding the server to its port. */
+    /** @type {RpcServerBindArgs} Arguments passed when binding the server to its port. */
     this.bindArgs;
 
     /** @type {void|Api} Api client when the "request" service is added. */

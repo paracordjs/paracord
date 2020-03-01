@@ -30,8 +30,8 @@ module.exports = class RequestQueue {
     /** @type {boolean} Whether or not the `process()` method is already executing. */
     this.processing = false;
     /** @type {import("./Request")[]} The queue. */
-    this.queue = new Array();
-    /** @type The internal value of the length of the queue. */
+    this.queue = [];
+    /** @type {number} The internal value of the length of the queue. */
     this._length = 0;
     /** @type {Api} Api client through which to emit events. */
     this.apiClient = apiClient;
@@ -66,13 +66,13 @@ module.exports = class RequestQueue {
     for (let idx = 0; idx < this.queue.length; ++idx) {
       // undefined = past end of array; null = past end of requests in array (rest are null)
       if (this.queue[idx] === undefined || this.queue[idx] === null) break;
-      if (indices.includes(idx)) continue;
-
-      this.queue[this._length] = this.queue[idx];
-      ++this._length;
+      if (!indices.includes(idx)) {
+        this.queue[this._length] = this.queue[idx];
+        ++this._length;
+      }
     }
 
-    // Assigns `null` to the remaning indices.
+    // Assigns `null` to the remaining indices.
     for (let idx = this._length; idx < this.queue.length; ++idx) {
       if (this.queue[idx] === undefined || this.queue[idx] === null) break;
 
