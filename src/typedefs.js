@@ -6,6 +6,8 @@
 
 /** @typedef {import("./rpc/services/request/RequestService")} RequestService */
 
+/** @typedef {import("./rpc/services/identifyLock/IdentifyLockService")} IdentifyLockService */
+
 /** @typedef {import("./clients/Api/structures/RateLimit")} RateLimit */
 
 /** @typedef {import("./clients/Api/structures/RateLimitCache")} RateLimitCache */
@@ -33,7 +35,7 @@
 /**
  * @typedef ApiOptions Optional parameters for this api handler.
  *
- * @property {import("events").EventEmitter} [emitter] Event emitter through which to emite debug and warning events.
+ * @property {import("events").EventEmitter} [emitter] Event emitter through which to emit debug and warning events.
  */
 
 /**
@@ -79,14 +81,12 @@
 
 /** @typedef {[number, number]} Shard [ShardID, ShardCount] to identify with. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure */
 
- /**
- * @typedef ParacordLoginOptions Optional parameters for Paracord's login method.
- * 
- * @param {Object<string, any>} [identity] An object containing information for identifying with the gateway. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
- * @property {number[]} [shards] Shards to spawn internally.
- * @property {number} [shardCount] The total number of shards that will be handled by the bot.
- * @property {boolean} [allowEventsDuringStartup=false] During startup, if events should be emitted before `PARACORD_STARTUP_COMPLETE` is emitted. `GUILD_CREATE` events will never be emitted during start up.
- */
+/**
+  * @typedef GatewayLockServerOptions
+  *
+  * @property  {void|ServerOptions} mainServerOptions Options for connecting this service to the identifylock server. Will not be released except by time out. Best used for global minimum wait time. Pass `null` to ignore.
+   * @property  {ServerOptions} [serverOptions] Options for connecting this service to the identifylock server. Will be acquired and released in order.
+  */
 
 // Paracord
 
@@ -98,9 +98,18 @@
  * @property {GatewayOptions} [gatewayOptions]
  */
 
+/**
+ * @typedef ParacordLoginOptions Optional parameters for Paracord's login method.
+ *
+ * @param {Object<string, any>} [identity] An object containing information for identifying with the gateway. https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
+ * @property {number[]} [shards] Shards to spawn internally.
+ * @property {number} [shardCount] The total number of shards that will be handled by the bot.
+ * @property {boolean} [allowEventsDuringStartup=false] During startup, if events should be emitted before `PARACORD_STARTUP_COMPLETE` is emitted. `GUILD_CREATE` events will never be emitted during start up.
+ */
+
 // Shard Launcher
 
- /**
+/**
  * @typedef ShardLauncherOptions
  * @property {string} [token] Discord token. Used to find recommended shard count when no `shardIds` provided. Will be coerced into a bot token.
  * @property {InternalShardIds} [shardIds] Ids of the shards to start internally. Ignored if `shardChunks` is defined.
@@ -159,7 +168,7 @@
  *
  * @property {boolean} success true, the operation was a success; false, the operation failed.
  * @property {string} message Reason for the failed operation.
- * @property {stirng} token Unique ID given to the last client to acquire the lock.
+ * @property {string} token Unique ID given to the last client to acquire the lock.
  */
 
 /**

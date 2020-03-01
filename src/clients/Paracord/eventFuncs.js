@@ -1,5 +1,6 @@
 'use strict';
 
+const Gateway = require('../Gateway');
 const { SECOND_IN_MILLISECONDS } = require('../../utils/constants');
 
 const Guild = require('./structures/Guild');
@@ -322,8 +323,9 @@ exports.GATEWAY_CLOSE = function GATEWAY_CLOSE({ shouldReconnect, gateway }) {
   if (shouldReconnect) {
     this.gatewayLoginQueue.push(gateway);
 
-    if (gateway.shard === this.startingShard) {
-      this.startingShard = null;
+    if (gateway.shard === this.startingGateway.shard) {
+      this.startingGateway.releaseIdentifyLocks();
+      this.startingGateway = null;
     }
   }
 };

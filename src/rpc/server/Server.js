@@ -72,7 +72,13 @@ module.exports = class Server extends grpc.Server {
    */
   createDefaultBindArgs() {
     const callback = () => {
-      this.start();
+      try {
+        this.start();
+      } catch (err) {
+        if (err.message === 'server must be bound in order to start') {
+          console.error('server must be bound in order to start. maybe this host:port is already bound?');
+        }
+      }
 
       const message = `Rpc server running at http://${this.host}:${this.port}`;
       this.emit('DEBUG', {
@@ -118,7 +124,7 @@ module.exports = class Server extends grpc.Server {
     });
   }
 
-  /** Adds the identify lock service to this erver. Allows the server to maintain a lock for clients. */
+  /** Adds the identify lock service to this server. Allows the server to maintain a lock for clients. */
   addLockService() {
     this.identifyLock = new Lock(this.emitter);
 
@@ -147,7 +153,7 @@ module.exports = class Server extends grpc.Server {
     });
   }
 
-  /** Start the cserver. */
+  /** Start the server. */
   serve() {
     this.bindAsync(...this.bindArgs);
   }

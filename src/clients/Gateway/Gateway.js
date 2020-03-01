@@ -21,7 +21,7 @@ const {
 } = require('../../utils/constants');
 
 /**
- * @typedef {Object<string, number>} WebsocketRateLimitCache Information about the current request count and time that it should reset in relation to Discord ratelimits. https://discordapp.com/developers/docs/topics/gateway#rate-limiting
+ * @typedef {Object<string, number>} WebsocketRateLimitCache Information about the current request count and time that it should reset in relation to Discord rate limits. https://discordapp.com/developers/docs/topics/gateway#rate-limiting
  * @property {number} wsRateLimitCache.resetTimestamp Timestamp in ms when the request limit is expected to reset.
  * @property {number} wsRateLimitCache.remainingRequests How many more requests will be allowed.
  */
@@ -34,23 +34,15 @@ module.exports = class Gateway {
    * @param {GatewayOptions} [options={}] Optional parameters for this handler.
    */
   constructor(token, options = {}) {
-    /** @type {boolean} If the gateway client is currently i nthe process of getting the ws url to connect. */
+    /** @type {boolean} If the gateway client is currently in the process of getting the ws url to connect. */
     this.loggingIn;
 
     /** @type {Api} Client through which to make REST api calls to Discord. */
     this.api;
-    /** @type {void|IdentifyLockService} Rpc service through which to coordinate identifies with other shards. */
-    this.identifyLock_1;
-    /** @type {void|IdentifyLockService} Rpc service through which to coordinate identifies with other shards. */
-    this.identifyLock_2;
-    /** @type {string} Unique value that this client received from the server identifyLock_1. */
-    this.identifyLockToken_1;
-    /** @type {string} Unique value that this client receive from the server identifyLock_2. */
-    this.identifyLockToken_2;
-    /** @type {boolean} When using the identify lock service, if the client is allowed to continue without this lock when not able to connect to the server. */
-    this.identifyLockAllowFallback_1;
-    /** @type {boolean} When using the identify lock service, if the client is allowed to continue without this lock when not able to connect to the server. */
-    this.identifyLockAllowFallback_2;
+    /** @type {void|IdentifyLockService} Rpc service through which to coordinate identifies with other shards. Will not be released except by time out. Best used for global minimum wait time. */
+    this.mainIdentifyLock;
+    /** @type {void|IdentifyLockService[]} Rpc service through which to coordinate identifies with other shards. */
+    this.identifyLocks;
 
     /** @type {ws} Websocket used to connect to gateway. */
     this.ws;
@@ -69,7 +61,7 @@ module.exports = class Gateway {
     this.heartbeatAck;
     /** @type {number} Time when last heartbeat packet was sent in ms. */
     this.lastHeartbeatTimestamp;
-    /** @type {NodeJS.Timer} Interval that checks and sends heartbeasts. */
+    /** @type {NodeJS.Timer} Interval that checks and sends heartbeats. */
     this.heartbeatInterval;
 
     /** @type {import("events").EventEmitter} Emitter for gateway and Api events. Will create a default if not provided via the options. */
@@ -77,7 +69,7 @@ module.exports = class Gateway {
     /** @type {Object<string,string>} Key:Value mapping DISCORD_EVENT to user's preferred emitted value. */
     this.events;
 
-    /** @type {Identity} Object passed to Discord when indentifying. */
+    /** @type {Identity} Object passed to Discord when identifying. */
     this.identity;
     /** @type {number} Minimum time to wait between gateway identifies in ms. */
     this.retryWait;
@@ -125,6 +117,7 @@ module.exports = class Gateway {
         remainingRequests: GATEWAY_MAX_REQUESTS_PER_MINUTE,
         resetTimestamp: 0,
       },
+      identifyLocks: [],
       ...options,
     };
 
@@ -215,27 +208,31 @@ module.exports = class Gateway {
   /**
    * Adds the service that will acquire a lock from a server(s) before identifying.
    *
-   * @param  {...ServerOptions} serverOptions A number of options for conencting this service to the server.
-   * The order these are in is the order that the locks must be acquired.
+   * @param  {void|ServerOptions} mainServerOptions Options for connecting this service to the identifylock server. Will not be released except by time out. Best used for global minimum wait time. Pass `null` to ignore.
+   * @param  {ServerOptions} [serverOptions] Options for connecting this service to the identifylock server. Will be acquired and released in order.
    */
-  addIdentifyLockService(...serverOptions) {
-    const [lockOptions1, lockOptions2] = serverOptions;
-
-    this.identifyLock_1 = new IdentifyLockService(lockOptions1);
-    this.identifyLockAllowFallback_1 = lockOptions1.allowFallback;
-    this.validateLockOptions(lockOptions1);
-    this.identifyLockDuration_1 = lockOptions1.duration;
-    let message = `Rpc service created for identify coordination. Connected to: ${this.identifyLock_1.target}`;
-
-    if (lockOptions2 !== undefined) {
-      this.identifyLock_2 = new IdentifyLockService(lockOptions2);
-      this.validateLockOptions(lockOptions2);
-      this.identifyLockDuration_2 = lockOptions1.duration;
-      message = `2 rpc services created for identify coordination. First: ${this.identifyLock_1.target}. Second: ${this.identifyLock_2.target}`;
-      this.identifyLockAllowFallback_2 = lockOptions2.allowFallback;
+  addIdentifyLockServices(mainServerOptions, ...serverOptions) {
+    if (mainServerOptions !== null) {
+      this.mainIdentifyLock = this.configureLockService(mainServerOptions);
     }
 
+    if (serverOptions.length) {
+      serverOptions.forEach((options) => {
+        this.identifyLocks.push(this.configureLockService(options));
+      });
+    }
+  }
+
+  configureLockService(serverOptions) {
+    const identifyLock = new IdentifyLockService(serverOptions);
+    Gateway.validateLockOptions(serverOptions);
+
+    identifyLock.allowFallback = serverOptions.allowFallback;
+    identifyLock.duration = serverOptions.duration;
+    const message = `Rpc service created for identify coordination. Connected to: ${identifyLock.target}. Default duration of lock: ${identifyLock.duration}`;
     this.log('INFO', message);
+
+    return identifyLock;
   }
 
   /**
@@ -243,7 +240,7 @@ module.exports = class Gateway {
    *
    * @param {*} options
    */
-  validateLockOptions(options) {
+  static validateLockOptions(options) {
     const { duration } = options;
     if (typeof duration !== 'number' && duration <= 0) {
       throw Error('Lock duration must be a number larger than 0.');
@@ -351,6 +348,8 @@ module.exports = class Gateway {
       return data.url + GATEWAY_DEFAULT_WS_PARAMS;
     }
     this.handleBadStatus(status, statusText, data.message, data.code);
+
+    return undefined;
   }
 
   /**
@@ -750,11 +749,10 @@ module.exports = class Gateway {
     this.sessionId = undefined;
     this.sequence = 0;
 
-    if (this.identifyLock_1) {
-      const receivedLocks = await this.acquireLocks();
-      if (!receivedLocks) {
-        return;
-      }
+    const acquiredLocks = await this.acquireLocks();
+    if (!acquiredLocks) {
+      setTimeout(() => this.identify(), SECOND_IN_MILLISECONDS);
+      return;
     }
 
     if (this.shard) {
@@ -770,122 +768,124 @@ module.exports = class Gateway {
   }
 
   /**
-   * Attempts to acquire the necessary locks for identifying.
+   * Attempts to acquire all the necessary locks to identify.
    * @private
-   * @returns {boolean} true if acquires locks; false if not.
+   * @returns {boolean} `true` if acquired locks; `false` if not.
    */
   async acquireLocks() {
-    let success = await this.acquireFirstLock();
+    if (this.identifyLocks !== undefined) {
+      const acquiredLocks = await this.acquireIdentifyLocks();
 
-    if (success && this.identifyLock_2 !== undefined) {
-      success = await this.acquireSecondLock();
+      if (!acquiredLocks) {
+        return false;
+      }
     }
 
-    return success;
+    if (this.mainIdentifyLock !== undefined) {
+      const acquiredLock = await this.acquireIdentifyLock(this.mainIdentifyLock);
+      if (!acquiredLock) {
+        if (this.identifyLocks !== undefined) {
+          this.identifyLocks.forEach((l) => Gateway.releaseIdentifyLock(l));
+        }
+
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  // TODO(lando): There's surely a more elegant way to handle this. Perhaps an array of locks that must be acquired in succession.
+  /**
+   * Attempts to acquire all the non-main identify locks in succession, releasing if one fails.
+   * @private
+   * @returns {boolean} `true` if acquired locks; `false` if not.
+   */
+  async acquireIdentifyLocks() {
+    if (this.identifyLocks !== undefined) {
+      /** @type {IdentifyLockService[]} */
+      const acquiredLocks = [];
+
+      for (let i = 0; i < this.identifyLocks.length; ++i) {
+      /** @type {IdentifyLockService} */
+        const lock = this.identifyLocks[i]; // for intellisense
+
+        const acquiredLock = await this.acquireIdentifyLock(lock);
+        if (acquiredLock) {
+          acquiredLocks.push(lock);
+        } else {
+          acquiredLocks.forEach((l) => Gateway.releaseIdentifyLock(l));
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
 
   /**
-   * Attempts to acquire the first lock.
+   * Attempts to acquire an identify lock.
    * @private
-   * @returns {boolean} true if the lock was acquired; false if not.
+   *
+   * @param {IdentifyLockService} lock Lock to acquire.
+   * @returns {boolean} `true` if acquired lock (or fallback); `false` if not.
    */
-  async acquireFirstLock() {
+  async acquireIdentifyLock(lock) {
     try {
-      const { token, message } = await this.acquireIdentifyLock(
-        this.identifyLock_1,
-        this.identifyLockDuration_1,
-        this.identifyLockToken_1,
-      );
+      const { success, message: err } = await lock.acquire();
 
-      if (token !== undefined) {
-        this.identifyLockToken_1 = token;
-        return true;
+      if (!success) {
+        this.log('DEBUG', `Was not able to acquire lock. Message: ${err}`);
+        return false;
       }
-      this.log(
-        'DEBUG',
-        `Was not able to acquire lock 1. Message: ${message}`,
-      );
 
-      return false;
+      return true;
     } catch (err) {
-      if (err.code === 14 && this.identifyLockAllowFallback_1) {
+      this.log('WARNING', `Was not able to connect to lock server to acquire lock: ${lock.target}. Fallback allowed: ${lock.allowFallback}`);
+
+      if (err.code === 14 && lock.allowFallback) {
+        if (err !== undefined) {
+          return false;
+        }
         return true;
       }
+
       throw err;
     }
   }
 
   /**
-   * Attempts to acquire the second lock.
+   * Releases all non-main identity locks.
    * @private
-   * @returns {boolean} true if the lock was acquired; false if not.
    */
-  async acquireSecondLock() {
-    try {
-      const { token, message: message_a } = await this.acquireIdentifyLock(
-        this.identifyLock_2,
-        this.identifyLockDuration_2,
-        this.identifyLockToken_2,
-      );
-
-      if (token !== undefined) {
-        this.identifyLockToken_2 = token;
-        return true;
-      }
-      this.log(
-        'DEBUG',
-        `Was not able to acquire lock 2. Message: ${message_a}`,
-      );
-
-      const message_r = await this.releaseIdentifyLock(
-        this.identifyLock_1,
-        this.identifyLockToken_1,
-      );
-
-      if (message_r !== undefined) {
-        this.log(
-          'DEBUG',
-          `Was not able to release lock 1. Message: ${message_r}`,
-        );
-      }
-
-      return false;
-    } catch (err) {
-      if (err.code === 14 && this.identifyLockAllowFallback_1) {
-        return true;
-      }
-      throw err;
+  async releaseIdentifyLocks() {
+    if (this.identifyLocks.length) {
+      this.identifyLocks.forEach((l) => {
+        if (l.token !== undefined) this.releaseIdentifyLock(l);
+      });
     }
-  }
-
-  /**
-   * Attempts to acquire the identity lock when identifying. If fails, sets client to attempt again in 1 second.
-   * @private
-   * @returns {boolean} true if acquired lock; false if not.
-   */
-  async acquireIdentifyLock(lock, timeOut, token) {
-    const { success, token: newToken, message } = await lock.acquire(
-      timeOut,
-      token,
-    );
-
-    if (success !== true) {
-      setTimeout(() => this.identify(), SECOND_IN_MILLISECONDS);
-    }
-
-    return { token: newToken, message };
   }
 
   /**
    * Releases the identity lock.
    * @private
-   * @returns {boolean} true if acquired lock; false if not.
+   *
+   * @param {IdentifyLockService} lock Lock to release.
    */
-  async releaseIdentifyLock(lock, token) {
-    const { message } = await lock.release(token);
-    return message;
+  async releaseIdentifyLock(lock) {
+    try {
+      const { message: err } = await lock.release();
+      lock.token = undefined;
+
+      if (err !== undefined) {
+        this.log('DEBUG', `Was not able to release lock. Message: ${err}`);
+      }
+    } catch (err) {
+      this.log('WARNING', `Was not able to connect to lock server to release lock: ${lock.target}.}`);
+
+      if (err.code !== 14) {
+        throw err;
+      }
+    }
   }
 
   /**

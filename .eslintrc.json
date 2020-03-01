@@ -29,14 +29,19 @@
     "strict": [
       2,
       "global"
-    ]
+    ],
+    "max-len": "warn",
+    "camelcase": "warn",
+    "prefer-const": "warn",
+    "no-await-in-loop": "warn"
   },
   "settings": {
     "import/core-modules": [
       "@grpc/grpc-js",
       "@grpc/proto-loader",
       "grpc",
-      "pm2"
+      "pm2",
+      "ws"
     ]
   }
 }
